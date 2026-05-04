@@ -1,5 +1,7 @@
 # Online Exam System
 
+# Nhớ cài các thư viện rồi mới chạy nhé
+
 ## Tech
 - Angular
 - Spring Boot
