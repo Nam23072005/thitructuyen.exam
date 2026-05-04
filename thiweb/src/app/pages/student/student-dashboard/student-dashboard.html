@@ -1,0 +1,13 @@
+<h2 style="margin-bottom: 20px;">Danh sách bài thi đang mở</h2>
+<div nz-row [nzGutter]="16">
+  <div nz-col [nzSpan]="12">
+    <nz-card nzTitle="Kiểm tra Java Spring Boot - 15 phút" [nzExtra]="extraTemplate">
+      <p>Số câu hỏi: 20</p>
+      <p>Thời gian làm bài: 15 phút</p>
+      <p>Trạng thái: <nz-tag nzColor="green">Đang mở</nz-tag></p>
+    </nz-card>
+    <ng-template #extraTemplate>
+      <button nz-button nzType="link">Vào thi ngay</button>
+    </ng-template>
+  </div>
+</div>

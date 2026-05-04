@@ -1,0 +1,26 @@
+<div class="bg" style="background-color: #F8F8F8;">
+  <div class="parent">
+    <div class="child">
+      <div nz-row class="imgDiv">
+        <h1 style="margin-left: 80px;">Đăng nhập</h1>
+      </div>
+
+      <form nz-form [formGroup]="validateForm" (ngSubmit)="submitForm()">
+        <nz-form-item>
+          <nz-form-control nzHasFeedback nzErrorTip="Vui lòng nhập đúng định dạng Email!">
+            <input nz-input placeholder="Email" formControlName="email" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-control nzHasFeedback nzErrorTip="Vui lòng nhập mật khẩu!">
+            <input nz-input placeholder="Mật khẩu" type="password" formControlName="password" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <button nz-button class="login-form-button" [nzType]="'primary'">Đăng nhập</button>
+        Hoặc <a routerLink="/register"> Đăng ký ngay! </a>
+      </form>
+    </div>
+  </div>
+</div>

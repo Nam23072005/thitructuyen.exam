@@ -1,0 +1,65 @@
+<div style="padding: 30px; background: #ececec;">
+  <div nz-row [nzGutter]="16">
+    <!-- Tổng số thí sinh -->
+    <div nz-col [nzSpan]="8">
+      <nz-card>
+        <nz-statistic
+          [nzValue]="stats.totalStudents"
+          [nzTitle]="'Tổng số thí sinh đã thi'"
+          [nzPrefix]="prefixStudents"
+        ></nz-statistic>
+        <ng-template #prefixStudents><span nz-icon nzType="team"></span></ng-template>
+      </nz-card>
+    </div>
+
+    <!-- Điểm trung bình -->
+    <div nz-col [nzSpan]="8">
+      <nz-card>
+        <nz-statistic
+          [nzValue]="stats.avgScore | number: '1.1-2'"
+          [nzTitle]="'Điểm trung bình hệ 10'"
+          [nzSuffix]="'/ 10'"
+        ></nz-statistic>
+      </nz-card>
+    </div>
+
+    <!-- Tỷ lệ đỗ -->
+    <div nz-col [nzSpan]="8">
+      <nz-card>
+        <p style="margin-bottom: 10px; color: rgba(0,0,0,.45);">Tỷ lệ đỗ (>= 5.0)</p>
+        <nz-progress
+          [nzPercent]="stats.passRate"
+          nzType="circle"
+          [nzWidth]="80"
+          [nzStrokeColor]="stats.passRate >= 50 ? '#52c41a' : '#f5222d'"
+        ></nz-progress>
+      </nz-card>
+    </div>
+  </div>
+
+  <!-- Bảng chi tiết (Nếu có dữ liệu danh sách) -->
+  <nz-card nzTitle="Danh sách chi tiết" style="margin-top: 20px;">
+    <nz-table #basicTable [nzData]="studentResults" nzSize="middle">
+      <thead>
+      <tr>
+        <th>Tên học sinh</th>
+        <th>Thời gian nộp</th>
+        <th>Điểm số</th>
+        <th>Trạng thái</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr *ngFor="let data of basicTable.data">
+        <td>{{ data.userName }}</td>
+        <td>{{ data.submitTime | date:'HH:mm dd/MM/yyyy' }}</td>
+        <td><b>{{ data.score }}</b></td>
+        <td>
+          <nz-badge [nzStatus]="data.score >= 5 ? 'success' : 'error'"
+                    [nzText]="data.score >= 5 ? 'Đỗ' : 'Trượt'">
+          </nz-badge>
+        </td>
+      </tr>
+      </tbody>
+    </nz-table>
+  </nz-card>
+</div>

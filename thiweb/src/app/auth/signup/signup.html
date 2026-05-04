@@ -1,0 +1,43 @@
+<div class="bg" style="background-color: #F8F8F8;">
+  <div class="parent">
+    <div class="child">
+      <div nz-row class="imgDiv">
+        <h1 style="margin-left: 80px;">Đăng ký</h1>
+      </div>
+
+      <form nz-form [formGroup]="validateForm" (ngSubmit)="submitForm()">
+
+        <nz-form-item>
+          <nz-form-control nzHasFeedback nzErrorTip>
+            <input nz-input placeholder="Tên" formControlName="name" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-control nzHasFeedback nzErrorTip>
+            <input nz-input placeholder="Mật khẩu" type="password" formControlName="password" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-control nzHasFeedback nzErrorTip>
+            <input nz-input placeholder="E-mail" formControlName="email" />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-control nzErrorTip="Vui lòng chọn vai trò!">
+            <nz-radio-group formControlName="role">
+              <label nz-radio nzValue="USER">Học sinh</label>
+              <label nz-radio nzValue="TEACHER">Giáo viên</label>
+            </nz-radio-group>
+          </nz-form-control>
+        </nz-form-item>
+
+        <button nz-button class="login-form-button login-form-margin" [nzType]="'primary'">Đăng ký</button>
+        Hoặc <a routerLink="/login">Đăng nhập</a>
+      </form>
+
+    </div>
+  </div>
+</div>

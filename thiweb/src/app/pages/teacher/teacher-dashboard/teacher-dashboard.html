@@ -1,0 +1,38 @@
+<div nz-row [nzGutter]="16">
+  <!-- Cột Đề thi đã tạo -->
+  <div nz-col [nzSpan]="8">
+    <nz-card>
+      <nz-statistic
+        [nzValue]="totalExams"
+        [nzTitle]="'Đề thi đã tạo'"
+        [nzPrefix]="iconExams">
+      </nz-statistic>
+      <ng-template #iconExams><span nz-icon nzType="file-done"></span></ng-template>
+    </nz-card>
+  </div>
+
+  <!-- Cột Lượt thí sinh -->
+  <div nz-col [nzSpan]="8">
+    <nz-card>
+      <nz-statistic
+        [nzValue]="totalStudents"
+        [nzTitle]="'Lượt thí sinh thi'"
+        [nzPrefix]="iconUser">
+      </nz-statistic>
+      <ng-template #iconUser><span nz-icon nzType="team"></span></ng-template>
+    </nz-card>
+  </div>
+
+  <!-- Cột Nút Tạo đề mới -->
+  <div nz-col [nzSpan]="8">
+    <!-- THÊM routerLink VÀO ĐÂY -->
+    <button
+      nz-button
+      nzType="primary"
+      nzBlock
+      style="height: 100px; font-size: 16px;"
+      routerLink="/teacher/manage-exams">
+      <span nz-icon nzType="plus"></span> Tạo đề thi mới
+    </button>
+  </div>
+</div>

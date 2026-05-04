@@ -1,0 +1,65 @@
+/* Giữ nguyên khung căn giữa từ trang Signup */
+.parent {
+  width: 100%;
+  height: 91vh;
+  position: relative;
+}
+
+.child {
+  padding: 50px;
+  position: absolute;
+  width: 380px;
+  background-color: white;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 1px 1px 15px -7px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+}
+
+/* Phần chứa tiêu đề "Đăng nhập" */
+.imgDiv {
+  width: 100%;
+  text-align: center; // Căn giữa tiêu đề
+  margin-bottom: 40px;
+
+  h1 {
+    margin: 0; // Xóa margin mặc định để căn chỉnh chuẩn hơn
+    font-weight: 600;
+  }
+}
+
+/* Tùy chỉnh form và input */
+[nz-form] {
+  max-width: 600px;
+}
+
+.nz-form-control {
+  min-width: 280px;
+}
+
+/* Nút bấm và các liên kết phụ */
+.login-form-button {
+  width: 100%;
+  height: 40px;
+  font-size: 16px;
+  background-color: #001529; // Màu tối giống bên Signup của bạn
+  border: none;
+  margin-top: 10px;
+  margin-bottom: 16px;
+}
+
+.login-form-forgot {
+  float: right;
+  margin-bottom: 10px;
+}
+
+/* Màu sắc và hiệu ứng cho link "Đăng ký ngay" */
+a {
+  color: #1890ff;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
