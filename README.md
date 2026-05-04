@@ -8,10 +8,10 @@
 ## Run
 
 Backend:
-cd thiserver
-mvn spring-boot:run
+- cd thiserver
+- mvn spring-boot:run
 
 Frontend:
-cd thiweb
-npm install
-ng serve
+- cd thiweb
+- npm install
+- ng serve
