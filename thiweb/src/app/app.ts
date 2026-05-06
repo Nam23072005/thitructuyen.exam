@@ -12,6 +12,10 @@ export class App {
   protected readonly title = signal('thiweb');
   constructor(private router: Router) {}
 
+  getUserName(): string {
+    return localStorage.getItem('user_name');
+  }
+
   getRole(): string | null {
     // Trả về '1' cho Học sinh, '2' cho Giáo viên
     return localStorage.getItem('user_role');
