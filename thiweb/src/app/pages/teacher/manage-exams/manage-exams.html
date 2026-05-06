@@ -1,3 +1,36 @@
+<div style="margin-bottom: 16px; text-align: right;">
+  <button nz-button nzType="primary" (click)="showModal()">
+    <span nz-icon nzType="plus"></span> Thêm đề thi mới
+  </button>
+</div>
+
+<!-- Modal chứa Form tạo đề -->
+<nz-modal [(nzVisible)]="isVisible" nzTitle="Tạo đề thi mới" (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()" [nzOkLoading]="isConfirmLoading">
+  <ng-container *nzModalContent>
+    <form nz-form nzLayout="vertical">
+      <nz-form-item>
+        <nz-form-label>Tên đề thi</nz-form-label>
+        <nz-form-control>
+          <input nz-input [(ngModel)]="newExam.title" name="title" placeholder="Nhập tên đề thi" />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label>Mô tả</nz-form-label>
+        <nz-form-control>
+          <textarea nz-input [(ngModel)]="newExam.description" name="description" placeholder="Mô tả ngắn gọn"></textarea>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label>Thời gian làm bài (phút)</nz-form-label>
+        <nz-form-control>
+          <nz-input-number [(ngModel)]="newExam.duration" name="duration" [nzMin]="1" [nzStep]="1" style="width: 100%"></nz-input-number>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-container>
+</nz-modal>
 <nz-table #basicTable [nzData]="exams" nzBordered>
   <thead>
   <tr>
