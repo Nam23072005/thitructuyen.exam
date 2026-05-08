@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { DemoNgZorroAntdModule } from '../../DemoNgZorroAntdModule';
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
 
 @NgModule({
   declarations: [],
@@ -13,6 +14,7 @@ import { DemoNgZorroAntdModule } from '../../DemoNgZorroAntdModule';
     RouterOutlet,
     RouterLink,
     DemoNgZorroAntdModule,
+    NzTooltipModule,
   ],
   exports: [
     CommonModule,

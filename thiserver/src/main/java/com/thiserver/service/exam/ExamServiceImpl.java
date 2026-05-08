@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class ExamServiceImpl implements ExamService{
@@ -60,5 +61,15 @@ public class ExamServiceImpl implements ExamService{
         stats.put("totalStudents", total);
         stats.put("passRate", total > 0 ? (passed * 100 / total) : 0);
         return stats;
+    }
+
+    public Exam toggleExamStatus(Long id) {
+        Optional<Exam> optionalExam = examRepo.findById(id);
+        if (optionalExam.isPresent()) {
+            Exam exam = optionalExam.get();
+            exam.setActive(!exam.isActive());
+            return examRepo.save(exam);
+        }
+        return null;
     }
 }

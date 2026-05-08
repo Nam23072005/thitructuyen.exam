@@ -33,4 +33,8 @@ export class Exam {
   deleteExam(id: number): Observable<any> {
     return this.http.delete(`${this.baseUrl}/exams/${id}`);
   }
+
+  toggleStatus(id: number) {
+    return this.http.put(`${this.baseUrl}/exam/${id}/toggle-status`, {});
+  }
 }

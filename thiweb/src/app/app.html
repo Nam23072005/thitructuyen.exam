@@ -12,6 +12,10 @@
     </div>
     }
     @else {
+      <div style="color: white; font-weight: 500; margin-right: 10px;">
+        <span nz-icon nzType="user" style="margin-right: 4px;"></span>
+        Chào, {{ getUserName() }}!
+      </div>
       <button nz-button nzType="default" nzDanger (click)="logout()">
         <span nz-icon nzType="logout"></span> Đăng xuất
       </button>

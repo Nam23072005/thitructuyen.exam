@@ -1,4 +1,4 @@
-<nz-card nzTitle="Soạn câu hỏi trắc nghiệm" [nzExtra]="extraTemplate">
+<nz-card nzTitle="Soạn câu hỏi trắc nghiệm">
   <div class="form-container">
     <label>Nội dung câu hỏi:</label>
     <textarea nz-input [(ngModel)]="questionContent" [nzAutosize]="{ minRows: 3 }" placeholder="Ví dụ: 1 + 1 bằng mấy?"></textarea>
@@ -54,7 +54,3 @@
     </div>
   </div>
 </nz-card>
-
-<ng-template #extraTemplate>
-  <span style="color: #1890ff;">Đang soạn cho Đề thi ID: {{examId}}</span>
-</ng-template>

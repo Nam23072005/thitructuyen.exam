@@ -1,4 +1,3 @@
-<!-- Nút bấm đặt ở góc trên bên phải hoặc phía trên bảng -->
 <div style="margin-bottom: 16px; text-align: right;">
   <button nz-button nzType="primary" (click)="showModal()">
     <span nz-icon nzType="plus"></span> Thêm đề thi mới
@@ -35,6 +34,8 @@
 <nz-table #basicTable [nzData]="exams" nzBordered>
   <thead>
   <tr>
+    <!-- Cột mới dành cho nút mở rộng (Expand) -->
+    <th nzWidth="60px"></th>
     <th>Tên đề thi</th>
     <th>Thời lượng</th>
     <th>Trạng thái</th>
@@ -42,9 +43,10 @@
   </tr>
   </thead>
   <tbody>
-  <!-- Sử dụng cú pháp @for mới thay cho *ngFor -->
     @for (data of exams; track data.id) {
+      <!-- Dòng hiển thị thông tin chung của đề thi -->
       <tr>
+        <td [nzExpand]="data.expand" (nzExpandChange)="data.expand = $event"></td>
         <td>{{ data.title }}</td>
         <td>{{ data.duration }} phút</td>
         <td>
@@ -53,30 +55,66 @@
           </nz-tag>
         </td>
         <td>
-          <!-- Nút thêm câu hỏi -->
           <a nz-button nzType="link" [routerLink]="['/teacher/add-question', data.id]">
             <span nz-icon nzType="plus-circle"></span> Thêm câu hỏi
           </a>
-
           <nz-divider nzType="vertical"></nz-divider>
-
-          <!-- Nút xem thống kê -->
+          <button nz-button nzType="link" (click)="onToggleStatus(data)"
+                  [nzTooltipTitle]="data.active ? 'Khóa đề thi' : 'Mở khóa đề thi'" nz-tooltip>
+            <span nz-icon [nzType]="data.active ? 'lock' : 'unlock'"
+                  [style.color]="data.active ? '#EE0000' : '#52c41a'"></span>
+            <span [style.color]="data.active ? '#EE0000' : '#52c41a'" style="margin-left: 4px;">
+                  {{ data.active ? 'Khóa' : 'Mở' }}
+            </span>
+          </button>
           <a nz-button nzType="link" [routerLink]="['/teacher/stats', data.id]">
             <span nz-icon nzType="bar-chart"></span> Xem thống kê
           </a>
-
           <nz-divider nzType="vertical"></nz-divider>
-
-          <!-- Nút xóa -->
           <button nz-button nzType="link" nzDanger (click)="onDelete(data.id)">
             <span nz-icon nzType="delete"></span> Xóa
           </button>
         </td>
       </tr>
+
+      <!-- Dòng mở rộng: Hiển thị chi tiết các câu hỏi bên trong -->
+      <tr [nzExpand]="data.expand">
+        <div style="padding: 16px; background-color: #fbfbfb; border-radius: 4px;">
+          <h4 style="margin-bottom: 16px; color: #1890ff;">
+            Danh sách câu hỏi ({{ data.questions?.length || 0 }} câu)
+          </h4>
+
+          <!-- Kiểm tra nếu có câu hỏi thì in ra danh sách -->
+          @if (data.questions && data.questions.length > 0) {
+            <nz-list nzBordered nzSize="small" style="background: white;">
+              @for (q of data.questions; track q.id; let i = $index) {
+                <nz-list-item>
+                  <div style="width: 100%;">
+                    <strong>Câu {{ i + 1 }}:</strong> {{ q.content }}
+
+                    <!-- Vòng lặp in ra các đáp án -->
+                    <ul style="margin-top: 8px; list-style-type: none; padding-left: 20px;">
+                      @for (opt of q.options; track opt.id) {
+                        <!-- Nếu đáp án đúng thì in đậm và tô màu xanh -->
+                        <li [style.color]="opt.correct ? '#52c41a' : '#333'"
+                            [style.fontWeight]="opt.correct ? 'bold' : 'normal'">
+                          <span nz-icon [nzType]="opt.correct ? 'check-circle' : 'minus'" style="margin-right: 8px;"></span>
+                          {{ opt.optionText }}
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                </nz-list-item>
+              }
+            </nz-list>
+          } @else {
+            <nz-empty nzNotFoundContent="Đề thi này chưa có câu hỏi nào"></nz-empty>
+          }
+        </div>
+      </tr>
     } @empty {
-      <!-- Hiển thị khi danh sách exams trống -->
       <tr>
-        <td colspan="4" style="text-align: center;">
+        <td colspan="5" style="text-align: center;">
           <nz-empty nzNotFoundContent="Chưa có đề thi nào được tạo"></nz-empty>
         </td>
       </tr>

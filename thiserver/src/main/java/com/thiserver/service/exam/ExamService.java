@@ -12,4 +12,5 @@ public interface ExamService {
     void deleteExam(Long id);
     Questions addQuestion(Long examId, Questions question);
     Map<String, Object> getStatistics(Long examId);
+    Exam toggleExamStatus(Long id);
 }

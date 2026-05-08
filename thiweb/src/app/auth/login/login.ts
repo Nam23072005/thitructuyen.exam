@@ -44,6 +44,7 @@ export class Login {
           localStorage.setItem('user_id', idToSave.toString());
           localStorage.setItem('user_role', res.role);
 
+          localStorage.setItem('user_name', res.name || 'Người dùng');
           // Điều hướng dựa trên vai trò
           if (res.role === 'TEACHER' || res.role === 'ADMIN') {
             this.router.navigateByUrl('/teacher/dashboard');
