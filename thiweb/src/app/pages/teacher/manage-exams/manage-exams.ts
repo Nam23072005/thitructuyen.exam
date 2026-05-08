@@ -2,10 +2,12 @@ import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { SharedModule } from '../../../modules/shared/shared-module';
 import { Exam } from '../../../service/exam';
 import { Router } from '@angular/router';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
 
 @Component({
   selector: 'app-manage-exams',
-  imports: [SharedModule],
+  imports: [SharedModule,NzTooltipModule],
   templateUrl: './manage-exams.html',
   styleUrl: './manage-exams.scss',
 })
@@ -19,6 +21,7 @@ export class ManageExams implements OnInit {
     private examService: Exam,
     private router: Router,
     private cdr: ChangeDetectorRef,
+    private message: NzMessageService,
   ) {}
 
   ngOnInit(): void {
@@ -73,6 +76,17 @@ export class ManageExams implements OnInit {
       error: (err) => {
         this.isConfirmLoading = false;
         console.error('Lỗi khi tạo đề:', err);
+      },
+    });
+  }
+  onToggleStatus(exam: any): void {
+    this.examService.toggleStatus(exam.id).subscribe({
+      next: (res) => {
+        this.message.success('Cập nhật trạng thái thành công!');
+        this.loadExams(); // Tải lại danh sách để cập nhật giao diện
+      },
+      error: (err) => {
+        this.message.error('Lỗi khi khóa/mở khóa đề thi');
       },
     });
   }

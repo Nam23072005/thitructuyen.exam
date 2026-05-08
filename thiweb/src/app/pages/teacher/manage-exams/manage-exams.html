@@ -59,6 +59,14 @@
             <span nz-icon nzType="plus-circle"></span> Thêm câu hỏi
           </a>
           <nz-divider nzType="vertical"></nz-divider>
+          <button nz-button nzType="link" (click)="onToggleStatus(data)"
+                  [nzTooltipTitle]="data.active ? 'Khóa đề thi' : 'Mở khóa đề thi'" nz-tooltip>
+            <span nz-icon [nzType]="data.active ? 'lock' : 'unlock'"
+                  [style.color]="data.active ? '#EE0000' : '#52c41a'"></span>
+            <span [style.color]="data.active ? '#EE0000' : '#52c41a'" style="margin-left: 4px;">
+                  {{ data.active ? 'Khóa' : 'Mở' }}
+            </span>
+          </button>
           <a nz-button nzType="link" [routerLink]="['/teacher/stats', data.id]">
             <span nz-icon nzType="bar-chart"></span> Xem thống kê
           </a>
