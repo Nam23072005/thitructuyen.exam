@@ -1,0 +1,148 @@
+.exam-wrapper {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  background-color: #fff;
+  position: relative;
+  overflow: hidden;
+
+  // Popup thông báo
+  .time-warning-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .warning-box {
+      background-color: #add8e6; // Màu xanh nhạt mockup Desktop-11
+      padding: 40px 80px;
+      border: 1px solid #000;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+  }
+
+  .main-content {
+    flex: 1;
+    padding: 30px 60px;
+    overflow-y: auto;
+
+    .btn-tab {
+      background-color: #d9d9d9;
+      border: none;
+      color: #000;
+      font-weight: bold;
+      height: 45px;
+      padding: 0 40px;
+      margin-bottom: 40px;
+    }
+
+    .question-container {
+      background-color: #f0f0f0; // Màu xám nhạt cho khối câu hỏi
+      padding: 20px 30px;
+      margin-bottom: 30px;
+      border-radius: 4px;
+
+      .question-header {
+        font-weight: bold;
+        margin-bottom: 15px;
+      }
+
+      .options-row {
+        display: flex;
+        gap: 50px;
+        
+        // Custom Ng Zorro Radio
+        ::ng-deep .ant-radio-wrapper {
+          display: flex;
+          align-items: center;
+          margin-right: 0;
+          font-size: 16px;
+
+          .option-label {
+            font-weight: bold;
+            margin-right: 4px;
+          }
+        }
+      }
+    }
+  }
+
+  .right-sidebar {
+    width: 320px;
+    background-color: #d9d9d9; // Nền xám cho sidebar
+    display: flex;
+    flex-direction: column;
+    padding: 40px 25px;
+
+    .section-title {
+      text-align: center;
+      font-weight: bold;
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .timer-display {
+      font-size: 40px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 40px;
+      color: #000;
+
+      &.emergency {
+        color: #ff4d4f; // Chuyển đỏ khi sắp hết giờ
+      }
+    }
+
+    .question-nav-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+      
+      .nav-item {
+        width: 100%;
+        aspect-ratio: 1/1;
+        background-color: #fff;
+        border: 1px solid #999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+
+        &.done {
+          background-color: #add8e6 !important;
+          border-color: #999;
+        }
+
+        &:hover {
+          border-color: #1890ff;
+        }
+      }
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+
+      .submit-footer-btn {
+        background-color: #ff9c9c; 
+        border: 1px solid #333;
+        color: #000;
+        font-weight: bold;
+        height: 50px;
+        font-size: 18px;
+
+        &:hover {
+          background-color: #ff7875;
+          color: #000;
+        }
+      }
+    }
+  }
+}

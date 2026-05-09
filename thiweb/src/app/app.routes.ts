@@ -6,6 +6,7 @@ import { TeacherDashboard } from './pages/teacher/teacher-dashboard/teacher-dash
 import { ManageExams } from './pages/teacher/manage-exams/manage-exams';
 import { AddQuestion } from './pages/teacher/add-question/add-question';
 import { ExamStats } from './pages/teacher/exam-stats/exam-stats';
+import { StudentExamComponent } from './pages/student/student-exam/student-exam.component';
 
 export const routes: Routes = [
   { path: 'register', component: Signup },
@@ -16,4 +17,5 @@ export const routes: Routes = [
   { path: 'teacher/manage-exams', component: ManageExams },
   { path: 'teacher/add-question/:id', component: AddQuestion },
   { path: 'teacher/stats/:id', component: ExamStats },
+  { path: 'student/exam/:id', component: StudentExamComponent }
 ];

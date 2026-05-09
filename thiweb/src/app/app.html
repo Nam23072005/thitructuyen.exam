@@ -1,70 +1,66 @@
-<nz-layout class="app-layout">
-  <!-- 1. Header: Giữ nguyên phong cách của Hòa -->
-  <nz-header class="main-header" nz-row style="background-color: darkolivegreen; display: flex; justify-content: space-between; align-items: center;">
-    <div>
-      <a style="color: aliceblue; margin-left: 50px; font-size: 20px; font-weight: bold" routerLink="/login">
-        Thi trực tuyến
-      </a>
-    </div>
-    @if (isAuthPage()){<div class="nav-links">
-      <a nz-button nzType="link" routerLink="/register" routerLinkActive="active" style="color: white;">Đăng ký</a>
-      <a nz-button nzType="link" routerLink="/login" routerLinkActive="active" style="color: white;">Đăng nhập</a>
-    </div>
-    }
-    @else {
-      <div style="color: white; font-weight: 500; margin-right: 10px;">
-        <span nz-icon nzType="user" style="margin-right: 4px;"></span>
-        Chào, {{ getUserName() }}!
+<!-- Cấu trúc tách biệt hoàn toàn để ép trang thi chiếm toàn màn hình -->
+@if (shouldHideLayout()) {
+  <!-- TRƯỜNG HỢP 1: TRANG THI (Không dùng nz-layout hệ thống) -->
+  <div style="width: 100vw; height: 100vh; overflow: hidden;">
+    <router-outlet></router-outlet>
+  </div>
+} 
+@else {
+  <!-- TRƯỜNG HỢP 2: CÁC TRANG DASHBOARD THÔNG THƯỜNG -->
+  <nz-layout class="app-layout">
+    <nz-header class="main-header" style="background-color: darkolivegreen; display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <a style="color: aliceblue; margin-left: 50px; font-size: 20px; font-weight: bold" routerLink="/login">
+          Thi trực tuyến
+        </a>
       </div>
-      <button nz-button nzType="default" nzDanger (click)="logout()">
-        <span nz-icon nzType="logout"></span> Đăng xuất
-      </button>
-    }
-  </nz-header>
+      
+      <div style="display: flex; align-items: center; margin-right: 20px;">
+        <div style="color: white; font-weight: 500; margin-right: 15px;">
+          <span nz-icon nzType="user" style="margin-right: 4px;"></span>
+          Chào, {{ getUserName() }}!
+        </div>
+        <button nz-button nzType="default" nzDanger (click)="logout()">
+          <span nz-icon nzType="logout"></span> Đăng xuất
+        </button>
+      </div>
+    </nz-header>
 
-  <nz-layout>
-    <!-- 2. Sidebar: Thanh điều hướng bên trái -->
-    @if (!isAuthPage()){
+    <nz-layout>
       <nz-sider nzWidth="256px" nzTheme="light" style="min-height: 100vh;">
-      <ul nz-menu nzMode="inline" style="height: 100%;">
-        <!-- Nhóm menu Giáo viên -->
-        @if (getRole() === 'TEACHER'){
-          <li nz-menu-group nzTitle="GIÁO VIÊN">
-          <ul>
-            <li nz-menu-item nzMatchRouter>
-              <a style="color: #1890ff" routerLink="/teacher/dashboard">
-                <span nz-icon nzType="dashboard"></span> Tổng quan
-              </a>
+        <ul nz-menu nzMode="inline" style="height: 100%;">
+          @if (getRole() === 'TEACHER'){
+            <li nz-menu-group nzTitle="GIÁO VIÊN">
+              <ul>
+                <li nz-menu-item nzMatchRouter>
+                  <a style="color: #1890ff" routerLink="/teacher/dashboard"><span nz-icon nzType="dashboard"></span> Tổng quan</a>
+                </li>
+                <li nz-menu-item nzMatchRouter>
+                  <a style="color: #1890ff" routerLink="/teacher/manage-exams"><span nz-icon nzType="form"></span> Quản lý đề thi</a>
+                </li>
+              </ul>
             </li>
-            <li nz-menu-item nzMatchRouter>
-              <a style="color: #1890ff" routerLink="/teacher/manage-exams"><span nz-icon nzType="form"></span> Quản lý đề thi</a>
+          }
+          @if (getRole() === 'USER'){
+            <li nz-menu-group nzTitle="HỌC SINH">
+              <ul>
+                <li nz-menu-item nzMatchRouter>
+                  <a style="color: #1890ff" routerLink="/student/dashboard"><span nz-icon nzType="desktop"></span> Làm bài thi</a>
+                </li>
+                <li nz-menu-item nzMatchRouter>
+                  <a style="color: #1890ff"><span nz-icon nzType="history"></span> Lịch sử thi</a>
+                </li>
+              </ul>
             </li>
-          </ul>
-        </li>
-        }
-        <!-- Nhóm menu Học sinh -->
-        @if (getRole() === 'USER'){
-          <li nz-menu-group nzTitle="HỌC SINH">
-          <ul>
-            <li nz-menu-item nzMatchRouter>
-              <a style="color: #1890ff" routerLink="/student/dashboard">
-                <span nz-icon nzType="desktop"></span> Làm bài thi
-              </a>
-            </li>
-            <li nz-menu-item nzMatchRouter>
-              <a style="color: #1890ff"><span nz-icon nzType="history"></span> Lịch sử thi</a>
-            </li>
-          </ul>
-        </li>
-        }
-      </ul>
-    </nz-sider>
-    }
-    <!-- 3. Content: Nơi hiển thị nội dung các trang -->
-    <nz-content style="padding: 24px; background-color: #f0f2f5;">
-      <div style="background: #fff; padding: 24px; min-height: 100%;">
-        <router-outlet></router-outlet>
-      </div>
-    </nz-content>
+          }
+        </ul>
+      </nz-sider>
+
+      <nz-content style="padding: 24px; background-color: #f0f2f5;">
+        <div style="background: #fff; padding: 24px; min-height: 100%;">
+          <router-outlet></router-outlet>
+        </div>
+      </nz-content>
+    </nz-layout>
   </nz-layout>
-</nz-layout>
+}

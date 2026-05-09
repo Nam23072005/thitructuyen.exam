@@ -7,7 +7,7 @@
       <p>Trạng thái: <nz-tag nzColor="green">Đang mở</nz-tag></p>
     </nz-card>
     <ng-template #extraTemplate>
-      <button nz-button nzType="link">Vào thi ngay</button>
+    <button nz-button nzType="link" [routerLink]="['/student/exam', 1]">Vào thi ngay</button>
     </ng-template>
   </div>
 </div>

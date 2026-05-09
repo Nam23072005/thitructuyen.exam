@@ -1,0 +1,57 @@
+<div class="exam-wrapper">
+  <!-- Popup thông báo sắp hết giờ theo phong cách Desktop-11 -->
+  <div class="time-warning-overlay" *ngIf="showWarning">
+    <div class="warning-box">
+      <h2 style="margin: 0; font-weight: bold;">Sắp hết giờ làm bài</h2>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="btn-tab-container">
+      <button nz-button nzType="default" class="btn-tab">Bài làm</button>
+    </div>
+
+    <div class="questions-list">
+      <div class="question-container" *ngFor="let q of questions; let i = index" [id]="'question-' + i">
+        <div class="question-header">Câu {{ i + 1 }}:</div>
+        
+        <nz-radio-group class="options-row" 
+                        [(ngModel)]="selectedAnswers[q.id]" 
+                        (ngModelChange)="selectOption(q.id, $event)">
+          <label nz-radio *ngFor="let opt of q.options; let idx = index" [nzValue]="opt.id">
+            <span class="option-label">{{ ['A', 'B', 'C', 'D'][idx] }}.</span>
+            <span class="option-text">{{ opt.optionText }}</span>
+          </label>
+        </nz-radio-group>
+      </div>
+    </div>
+  </div>
+
+  <div class="right-sidebar">
+    <div class="sidebar-section">
+      <p class="section-title">Thời gian</p>
+      <!-- Timer tự đổi màu đỏ khi còn dưới 10 phút -->
+      <div class="timer-display" [class.emergency]="seconds <= 600">
+        {{ remainingTime }}
+      </div>
+
+      <div class="question-nav-grid">
+        <div class="nav-item" 
+             *ngFor="let q of questions; let i = index"
+             [class.done]="selectedAnswers[q.id]"
+             (click)="scrollToQuestion(i)">
+          {{ i + 1 }}
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <button nz-button 
+              nzBlock 
+              class="submit-footer-btn" 
+              (click)="submitExam()">
+        Nộp bài
+      </button>
+    </div>
+  </div>
+</div>
