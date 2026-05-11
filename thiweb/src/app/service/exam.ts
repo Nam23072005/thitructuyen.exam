@@ -11,11 +11,11 @@ export class Exam {
   constructor(private http: HttpClient) {}
 
   // Lấy danh sách đề của tôi
-  getMyExams(teacherId: string): Observable<any[]> {
+  getMyExams(teacherId: any): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/exams/my/${teacherId}`);
   }
 
-  // Lưu đề thi mới (chỉ cần title, description, duration)
+  // Lưu đề thi mới
   saveExam(exam: any): Observable<any> {
     return this.http.post(`${this.baseUrl}/exams`, exam);
   }
@@ -36,5 +36,10 @@ export class Exam {
 
   toggleStatus(id: number) {
     return this.http.put(`${this.baseUrl}/exam/${id}/toggle-status`, {});
+  }
+
+  // ĐẢO ĐỀ
+  getExamByIdWithShuffle(id: number): Observable<any> {
+    return this.http.get(`${this.baseUrl}/exams/${id}`);
   }
 }

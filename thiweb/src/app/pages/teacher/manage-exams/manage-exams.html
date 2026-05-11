@@ -4,7 +4,6 @@
   </button>
 </div>
 
-<!-- Modal chứa Form tạo đề -->
 <nz-modal [(nzVisible)]="isVisible" nzTitle="Tạo đề thi mới" (nzOnCancel)="handleCancel()" (nzOnOk)="handleOk()" [nzOkLoading]="isConfirmLoading">
   <ng-container *nzModalContent>
     <form nz-form nzLayout="vertical">
@@ -14,14 +13,12 @@
           <input nz-input [(ngModel)]="newExam.title" name="title" placeholder="Nhập tên đề thi" />
         </nz-form-control>
       </nz-form-item>
-
       <nz-form-item>
         <nz-form-label>Mô tả</nz-form-label>
         <nz-form-control>
           <textarea nz-input [(ngModel)]="newExam.description" name="description" placeholder="Mô tả ngắn gọn"></textarea>
         </nz-form-control>
       </nz-form-item>
-
       <nz-form-item>
         <nz-form-label>Thời gian làm bài (phút)</nz-form-label>
         <nz-form-control>
@@ -31,20 +28,19 @@
     </form>
   </ng-container>
 </nz-modal>
+
 <nz-table #basicTable [nzData]="exams" nzBordered>
   <thead>
   <tr>
-    <!-- Cột mới dành cho nút mở rộng (Expand) -->
     <th nzWidth="60px"></th>
     <th>Tên đề thi</th>
     <th>Thời lượng</th>
     <th>Trạng thái</th>
-    <th nzWidth="300px">Thao tác</th>
+    <th nzWidth="400px">Thao tác</th>
   </tr>
   </thead>
   <tbody>
     @for (data of exams; track data.id) {
-      <!-- Dòng hiển thị thông tin chung của đề thi -->
       <tr>
         <td [nzExpand]="data.expand" (nzExpandChange)="data.expand = $event"></td>
         <td>{{ data.title }}</td>
@@ -58,7 +54,18 @@
           <a nz-button nzType="link" [routerLink]="['/teacher/add-question', data.id]">
             <span nz-icon nzType="plus-circle"></span> Thêm câu hỏi
           </a>
+          
+          <button nz-button nzType="link" (click)="onShuffle(data.id)" 
+                  nzTooltipTitle="Đảo ngẫu nhiên câu hỏi & đáp án" nz-tooltip>
+            <span nz-icon nzType="reload"></span> Đảo đề
+          </button>
+
+          <a nz-button nzType="link" [routerLink]="['/teacher/stats', data.id]">
+            <span nz-icon nzType="bar-chart"></span> Xem thống kê
+          </a>
+
           <nz-divider nzType="vertical"></nz-divider>
+
           <button nz-button nzType="link" (click)="onToggleStatus(data)"
                   [nzTooltipTitle]="data.active ? 'Khóa đề thi' : 'Mở khóa đề thi'" nz-tooltip>
             <span nz-icon [nzType]="data.active ? 'lock' : 'unlock'"
@@ -67,35 +74,26 @@
                   {{ data.active ? 'Khóa' : 'Mở' }}
             </span>
           </button>
-          <a nz-button nzType="link" [routerLink]="['/teacher/stats', data.id]">
-            <span nz-icon nzType="bar-chart"></span> Xem thống kê
-          </a>
-          <nz-divider nzType="vertical"></nz-divider>
+          
           <button nz-button nzType="link" nzDanger (click)="onDelete(data.id)">
             <span nz-icon nzType="delete"></span> Xóa
           </button>
         </td>
       </tr>
 
-      <!-- Dòng mở rộng: Hiển thị chi tiết các câu hỏi bên trong -->
       <tr [nzExpand]="data.expand">
         <div style="padding: 16px; background-color: #fbfbfb; border-radius: 4px;">
           <h4 style="margin-bottom: 16px; color: #1890ff;">
             Danh sách câu hỏi ({{ data.questions?.length || 0 }} câu)
           </h4>
-
-          <!-- Kiểm tra nếu có câu hỏi thì in ra danh sách -->
           @if (data.questions && data.questions.length > 0) {
             <nz-list nzBordered nzSize="small" style="background: white;">
               @for (q of data.questions; track q.id; let i = $index) {
                 <nz-list-item>
                   <div style="width: 100%;">
                     <strong>Câu {{ i + 1 }}:</strong> {{ q.content }}
-
-                    <!-- Vòng lặp in ra các đáp án -->
                     <ul style="margin-top: 8px; list-style-type: none; padding-left: 20px;">
                       @for (opt of q.options; track opt.id) {
-                        <!-- Nếu đáp án đúng thì in đậm và tô màu xanh -->
                         <li [style.color]="opt.correct ? '#52c41a' : '#333'"
                             [style.fontWeight]="opt.correct ? 'bold' : 'normal'">
                           <span nz-icon [nzType]="opt.correct ? 'check-circle' : 'minus'" style="margin-right: 8px;"></span>
