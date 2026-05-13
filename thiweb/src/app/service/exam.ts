@@ -30,16 +30,18 @@ export class Exam {
     return this.http.get(`${this.baseUrl}/exams/${examId}/stats`);
   }
 
+  // Xóa đề thi
   deleteExam(id: number): Observable<any> {
     return this.http.delete(`${this.baseUrl}/exams/${id}`);
   }
 
-  toggleStatus(id: number) {
+  // Thay đổi trạng thái đóng/mở đề
+  toggleStatus(id: number): Observable<any> {
     return this.http.put(`${this.baseUrl}/exam/${id}/toggle-status`, {});
   }
 
-  // ĐẢO ĐỀ
-  getExamByIdWithShuffle(id: number): Observable<any> {
-    return this.http.get(`${this.baseUrl}/exams/${id}`);
+  //  ĐẢO ĐỀ
+  shuffleExam(id: number): Observable<any> {
+    return this.http.get(`${this.baseUrl}/exams/${id}/shuffle`);
   }
 }

@@ -1,22 +1,25 @@
 package com.thiserver.service.exam;
 
-import com.thiserver.entities.Exam;
-import com.thiserver.entities.Questions;
-import com.thiserver.entities.Result;
-import com.thiserver.repository.ExamRepository;
-import com.thiserver.repository.QuestionRepository;
-import com.thiserver.repository.ResultRepository;
-import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.thiserver.entities.Exam;
+import com.thiserver.entities.Questions;
+import com.thiserver.entities.Result; // Thêm thư viện để đảo danh sách
+import com.thiserver.repository.ExamRepository;
+import com.thiserver.repository.QuestionRepository;
+import com.thiserver.repository.ResultRepository;
+
+import jakarta.transaction.Transactional;
+
 @Service
-public class ExamServiceImpl implements ExamService{
+public class ExamServiceImpl implements ExamService {
     @Autowired private ExamRepository examRepo;
     @Autowired private QuestionRepository questionRepo;
     @Autowired private ResultRepository resultRepo;
@@ -69,6 +72,29 @@ public class ExamServiceImpl implements ExamService{
             Exam exam = optionalExam.get();
             exam.setActive(!exam.isActive());
             return examRepo.save(exam);
+        }
+        return null;
+    }
+
+    // Chức năng đảo đề: Đảo ngẫu nhiên câu hỏi và các đáp án bên trong
+    @Override
+    public Exam shuffleExam(Long examId) {
+        Optional<Exam> optionalExam = examRepo.findById(examId);
+        if (optionalExam.isPresent()) {
+            Exam exam = optionalExam.get();
+            
+            // 1. Đảo ngẫu nhiên danh sách câu hỏi
+            if (exam.getQuestions() != null && !exam.getQuestions().isEmpty()) {
+                Collections.shuffle(exam.getQuestions());
+                
+                // 2. Đảo ngẫu nhiên danh sách đáp án (Options) của từng câu hỏi
+                for (Questions question : exam.getQuestions()) {
+                    if (question.getOptions() != null && !question.getOptions().isEmpty()) {
+                        Collections.shuffle(question.getOptions());
+                    }
+                }
+            }
+            return exam; 
         }
         return null;
     }

@@ -7,7 +7,7 @@ import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
 
 @Component({
   selector: 'app-manage-exams',
-  standalone: true, // Thêm standalone nếu project dùng Angular mới
+  standalone: true, 
   imports: [SharedModule, NzTooltipModule],
   templateUrl: './manage-exams.html',
   styleUrl: './manage-exams.scss',
@@ -40,16 +40,28 @@ export class ManageExams implements OnInit {
     });
   }
 
-  // --- HÀM XỬ LÝ ĐẢO ĐỀ ---
+  // dao de
   onShuffle(id: number): void {
-    this.examService.getExamByIdWithShuffle(id).subscribe({
+    this.examService.shuffleExam(id).subscribe({
       next: (res) => {
         this.message.success('Đã đảo ngẫu nhiên câu hỏi và đáp án thành công!');
-        this.loadExams(); // Tải lại để thấy thứ tự mới ở dòng mở rộng
+        
+        //  tim de thi vua dao va cap nhat du lieu moi
+        const index = this.exams.findIndex(e => e.id === id);
+        if (index !== -1) {
+          // hien du lieu moi
+          this.exams[index] = res;
+
+          this.exams[index].expand = true; 
+          
+          // hien ngay lap tuc
+          this.exams = [...this.exams];
+          this.cdr.detectChanges();
+        }
       },
       error: (err) => {
         this.message.error('Lỗi khi thực hiện đảo đề!');
-        console.error(err);
+        console.error('Lỗi chi tiết:', err);
       }
     });
   }
