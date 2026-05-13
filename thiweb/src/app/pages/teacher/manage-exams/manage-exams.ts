@@ -7,7 +7,8 @@ import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
 
 @Component({
   selector: 'app-manage-exams',
-  imports: [SharedModule,NzTooltipModule],
+  standalone: true, 
+  imports: [SharedModule, NzTooltipModule],
   templateUrl: './manage-exams.html',
   styleUrl: './manage-exams.scss',
 })
@@ -15,7 +16,7 @@ export class ManageExams implements OnInit {
   isVisible = false;
   isConfirmLoading = false;
   exams: any[] = [];
-  teacherId = localStorage.getItem('user_id') || ''; // Lấy ID giáo viên đã lưu khi login
+  teacherId = localStorage.getItem('user_id') || '';
 
   constructor(
     private examService: Exam,
@@ -33,21 +34,50 @@ export class ManageExams implements OnInit {
     this.examService.getMyExams(teacherId).subscribe({
       next: (res) => {
         this.exams = res;
-        // 3. Ép Angular kiểm tra lại giao diện ngay lập tức
         this.cdr.detectChanges();
       },
       error: (err) => console.error(err),
     });
   }
 
-  onDelete(id: number) {
-    this.examService.deleteExam(id).subscribe(() => this.loadExams());
+  // dao de
+  onShuffle(id: number): void {
+    this.examService.shuffleExam(id).subscribe({
+      next: (res) => {
+        this.message.success('Đã đảo ngẫu nhiên câu hỏi và đáp án thành công!');
+        
+        //  tim de thi vua dao va cap nhat du lieu moi
+        const index = this.exams.findIndex(e => e.id === id);
+        if (index !== -1) {
+          // hien du lieu moi
+          this.exams[index] = res;
+
+          this.exams[index].expand = true; 
+          
+          // hien ngay lap tuc
+          this.exams = [...this.exams];
+          this.cdr.detectChanges();
+        }
+      },
+      error: (err) => {
+        this.message.error('Lỗi khi thực hiện đảo đề!');
+        console.error('Lỗi chi tiết:', err);
+      }
+    });
   }
+
+  onDelete(id: number) {
+    this.examService.deleteExam(id).subscribe(() => {
+      this.message.success('Đã xóa đề thi');
+      this.loadExams();
+    });
+  }
+
   newExam = {
     title: '',
     description: '',
     duration: 60,
-    teacherId: localStorage.getItem('user_id'), // Gắn ID của Hòa vào đây
+    teacherId: localStorage.getItem('user_id'),
   };
 
   showModal(): void {
@@ -60,30 +90,25 @@ export class ManageExams implements OnInit {
 
   handleOk(): void {
     this.isConfirmLoading = true;
-
     this.examService.saveExam(this.newExam).subscribe({
       next: (res) => {
-        // res chính là đề thi vừa tạo, ví dụ: { id: 10, title: 'sinh', ... }
         this.isVisible = false;
         this.isConfirmLoading = false;
-
-        // ĐÂY LÀ DÒNG LỆNH CHUYỂN TRANG
-        // Nó sẽ dẫn Hòa đến URL: /teacher/add-question/10
+        this.message.success('Tạo đề thành công!');
         this.router.navigate(['/teacher/add-question', res.id]);
-
-        console.log('Đã tạo đề thành công với ID:', res.id);
       },
       error: (err) => {
         this.isConfirmLoading = false;
-        console.error('Lỗi khi tạo đề:', err);
+        this.message.error('Lỗi khi tạo đề');
       },
     });
   }
+
   onToggleStatus(exam: any): void {
     this.examService.toggleStatus(exam.id).subscribe({
       next: (res) => {
         this.message.success('Cập nhật trạng thái thành công!');
-        this.loadExams(); // Tải lại danh sách để cập nhật giao diện
+        this.loadExams();
       },
       error: (err) => {
         this.message.error('Lỗi khi khóa/mở khóa đề thi');

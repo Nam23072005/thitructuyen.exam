@@ -3,7 +3,11 @@
   "version": 1,
   "cli": {
     "packageManager": "npm",
+<<<<<<< HEAD
     "analytics": false
+=======
+    "analytics": "d1fdc344-5c2e-469a-ba9a-7907aac88e64"
+>>>>>>> loi_dao
   },
   "newProjectRoot": "projects",
   "projects": {
