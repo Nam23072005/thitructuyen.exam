@@ -6,7 +6,9 @@
 
     <div class="questions-list">
       <div class="question-container" *ngFor="let q of questions; let i = index" [id]="'question-' + i">
-        <div class="question-header">Câu {{ i + 1 }}:</div>
+           <div class="question-header">
+            Câu {{ i + 1 }}: {{ q.content }}
+          </div>
         <nz-radio-group class="options-row" [(ngModel)]="selectedAnswers[q.id]" (ngModelChange)="selectOption(q.id, $event)">
           <label nz-radio *ngFor="let opt of q.options; let idx = index" [nzValue]="opt.id">
             <span class="option-label">{{ ['A', 'B', 'C', 'D'][idx] }}.</span>
