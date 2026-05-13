@@ -10,30 +10,25 @@ import { SharedModule } from './modules/shared/shared-module';
 })
 export class App {
   protected readonly title = signal('thiweb');
-  
   constructor(private router: Router) {}
 
-  getUserName(): string | null {
+  getUserName(): string {
     return localStorage.getItem('user_name');
   }
 
   getRole(): string | null {
+    // Trả về '1' cho Học sinh, '2' cho Giáo viên
     return localStorage.getItem('user_role');
   }
-
-  // Hàm này sẽ trả về true nếu cần ẨN Sidebar và Header
-  shouldHideLayout(): boolean {
-    const currentUrl = this.router.url;
+  // Hàm kiểm tra để ẩn/hiện Sidebar
+  isAuthPage(): boolean {
     const authRoutes = ['/login', '/register', '/'];
-    
-    // Kiểm tra nếu là trang auth HOẶC trang đang làm bài thi
-    const isExamPage = currentUrl.includes('/student/exam/');
-    
-    return authRoutes.includes(currentUrl) || isExamPage;
+    return authRoutes.includes(this.router.url);
   }
-
   logout() {
+    // Xóa toàn bộ thông tin đã lưu (như user_role, user_id)
     localStorage.clear();
+    // Quay về trang đăng nhập
     this.router.navigateByUrl('/login');
   }
 }
