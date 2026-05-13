@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core'; // Thêm OnDestroy để dọn dẹp bộ nhớ
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core'; // Thêm OnDestroy để dọn dẹp bộ nhớ
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
@@ -26,7 +26,8 @@ export class StudentExamComponent implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute, 
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef, // Thêm vào đây
   ) {}
 
   ngOnInit() {
@@ -45,6 +46,7 @@ export class StudentExamComponent implements OnInit, OnDestroy {
           this.questions = exam.questions;
           this.seconds = exam.duration * 60; // Chuyển đổi từ phút sang giây
           this.formatTime();
+          this.cdr.detectChanges();
           this.startCountdown();
         },
         error: (err) => {
@@ -109,7 +111,7 @@ export class StudentExamComponent implements OnInit, OnDestroy {
     }
 
     const submission = {
-      userId: 1, 
+      userId: Number(localStorage.getItem('user_id')), 
       examId: this.examId,
       answers: Object.keys(this.selectedAnswers).map(qId => ({
         questionId: Number(qId),
