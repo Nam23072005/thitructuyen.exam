@@ -1,13 +1,31 @@
 <h2 style="margin-bottom: 20px;">Danh sách bài thi đang mở</h2>
-<div nz-row [nzGutter]="16">
-  <div nz-col [nzSpan]="12">
-    <nz-card nzTitle="Kiểm tra Java Spring Boot - 15 phút" [nzExtra]="extraTemplate">
-      <p>Số câu hỏi: 20</p>
-      <p>Thời gian làm bài: 15 phút</p>
-      <p>Trạng thái: <nz-tag nzColor="green">Đang mở</nz-tag></p>
+ 
+<div *ngIf="isLoading" style="text-align: center; padding: 40px;">
+  <nz-spin nzSimple></nz-spin>
+</div>
+ 
+<nz-empty
+  *ngIf="!isLoading && exams.length === 0"
+  nzNotFoundContent="Hiện chưa có bài thi nào đang mở">
+</nz-empty>
+ 
+<div nz-row [nzGutter]="[16, 16]" *ngIf="!isLoading && exams.length > 0">
+  <div nz-col [nzSpan]="12" *ngFor="let exam of exams">
+    <nz-card [nzTitle]="exam.title" [nzExtra]="extraTemplate">
+      <p>
+        <span nz-icon nzType="question-circle" style="margin-right: 6px;"></span>
+        Số câu hỏi: <b>{{ exam.questions?.length || 0 }}</b>
+      </p>
+      <p>
+        <span nz-icon nzType="clock-circle" style="margin-right: 6px;"></span>
+        Thời gian làm bài: <b>{{ exam.duration }} phút</b>
+      </p>
     </nz-card>
+ 
     <ng-template #extraTemplate>
-    <button nz-button nzType="link" [routerLink]="['/student/exam', 5]">Vào thi ngay</button>
+      <a nz-button nzType="link" [routerLink]="['/student/exam', exam.id]">
+        <span nz-icon nzType="play-circle"></span> Vào thi ngay
+      </a>
     </ng-template>
   </div>
 </div>

@@ -31,4 +31,10 @@ export class App {
     // Quay về trang đăng nhập
     this.router.navigateByUrl('/login');
   }
+  shouldHideLayout(): boolean {
+  const currentUrl = this.router.url;
+  const authRoutes = ['/login', '/register', '/'];
+  const isExamPage = currentUrl.includes('/student/exam/');
+  return authRoutes.includes(currentUrl) || isExamPage;
+}
 }
