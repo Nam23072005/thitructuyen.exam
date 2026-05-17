@@ -14,15 +14,19 @@ import { SharedModule } from '../../../modules/shared/shared-module';
 })
 export class StudentExamComponent implements OnInit, OnDestroy {
   questions: any[] = [];
-  selectedAnswers: { [key: number]: number } = {}; 
+  selectedAnswers: { [key: number]: number } = {};
   examId: number | null = null;
-  
+
   // Logic đếm ngược thời gian
-  remainingTime: string = "00:00"; 
+  remainingTime: string = "00:00";
   seconds: number = 0;
   timer: any;
-  showWarning: boolean = false; 
-  private warningTriggered = false; // Flag để đảm bảo popup chỉ hiện 1 lần
+  showWarning: boolean = false;
+  private warningTriggered = false;
+
+  // Kết quả nộp bài
+  showResultModal: boolean = false;
+  submissionResult: any = null;
 
   constructor(
     private route: ActivatedRoute, 
@@ -154,15 +158,20 @@ export class StudentExamComponent implements OnInit, OnDestroy {
     this.http.post('http://localhost:8080/api/user-exams/submit', submission)
       .subscribe({
         next: (res: any) => {
-          this.stopTimer(); 
-          alert(`Nộp bài thành công! Điểm của bạn: ${res.score}`);
-          this.router.navigate(['/student/dashboard']);
+          this.stopTimer();
+          this.submissionResult = res;
+          this.showResultModal = true;
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Lỗi nộp bài:', err);
           alert('Có lỗi xảy ra khi nộp bài. Vui lòng thử lại!');
-        } 
+        }
       });
   }
-  
+
+  backToDashboard() {
+    this.showResultModal = false;
+    this.router.navigate(['/student/dashboard']);
+  }
 }

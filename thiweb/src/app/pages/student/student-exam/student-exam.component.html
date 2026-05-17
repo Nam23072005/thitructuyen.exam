@@ -1,4 +1,30 @@
 <div class="exam-wrapper">
+  <!-- RESULT MODAL - Simple overlay -->
+  <div class="result-overlay" *ngIf="showResultModal">
+    <div class="result-dialog">
+      <div class="result-icon">
+        <span nz-icon nzType="check-circle" nzTheme="fill" style="color: #52c41a; font-size: 48px;"></span>
+      </div>
+      <h3>Nộp bài thành công!</h3>
+
+      <div class="score-message">
+        <p>Bạn đạt được <strong>{{ submissionResult?.score || 0 }}</strong> điểm</p>
+      </div>
+
+      <div class="score-section">
+        <p class="score-label">Kết quả</p>
+        <p class="score-value">{{ submissionResult?.score || 0 }}</p>
+      </div>
+      <p class="submission-time">{{ submissionResult?.submittedAt | date:'dd/MM/yyyy HH:mm:ss' }}</p>
+
+      <div class="modal-footer">
+        <button nz-button nzType="primary" (click)="backToDashboard()">
+          Quay về 
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- 1. POPUP THÔNG BÁO SẮP HẾT GIỜ (Hiện khi còn 10 phút) -->
   <div class="time-warning-overlay" *ngIf="showWarning">
     <div class="warning-box">
@@ -15,21 +41,21 @@
 
     <div class="questions-list">
       <!-- Lặp qua danh sách câu hỏi -->
-      <div class="question-container" 
-           *ngFor="let q of questions; let i = index" 
+      <div class="question-container"
+           *ngFor="let q of questions; let i = index"
            [id]="'question-' + i">
-        
+
         <div class="question-header">
-          <span class="question-number">Câu {{ i + 1 }}:</span> 
+          <span class="question-number">Câu {{ i + 1 }}:</span>
           <span class="question-text">{{ q.content }}</span>
         </div>
 
-        <nz-radio-group class="options-row" 
-                        [(ngModel)]="selectedAnswers[q.id]" 
+        <nz-radio-group class="options-row"
+                        [(ngModel)]="selectedAnswers[q.id]"
                         (ngModelChange)="selectOption(q.id, $event)">
           <!-- Lặp qua các lựa chọn đáp án -->
-          <label nz-radio 
-                 *ngFor="let opt of q.options; let idx = index" 
+          <label nz-radio
+                 *ngFor="let opt of q.options; let idx = index"
                  [nzValue]="opt.id">
             <span class="option-label">{{ ['A', 'B', 'C', 'D'][idx] }}.</span>
             <span class="option-text">{{ opt.optionText }}</span>
@@ -43,10 +69,10 @@
   <div class="right-sidebar">
     <div class="sidebar-body">
       <p class="section-title">Danh sách câu hỏi</p>
-      
+
       <!-- Lưới điều hướng câu hỏi -->
       <div class="question-nav-grid">
-        <div class="nav-item" 
+        <div class="nav-item"
              *ngFor="let q of questions; let i = index"
              [class.done]="selectedAnswers[q.id]"
              (click)="scrollToQuestion(i)">
@@ -63,10 +89,10 @@
           {{ remainingTime }}
         </div>
       </div>
-      
-      <button nz-button 
-              nzBlock 
-              class="btn-submit" 
+
+      <button nz-button
+              nzBlock
+              class="btn-submit"
               (click)="submitExam()">
         Nộp bài
       </button>
