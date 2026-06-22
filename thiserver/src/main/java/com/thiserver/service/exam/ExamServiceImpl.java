@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.thiserver.entities.Exam;
 import com.thiserver.entities.Questions;
-import com.thiserver.entities.Result; // Thêm thư viện để đảo danh sách
+import com.thiserver.entities.Result;
 import com.thiserver.repository.ExamRepository;
 import com.thiserver.repository.QuestionRepository;
 import com.thiserver.repository.ResultRepository;
@@ -44,7 +44,6 @@ public class ExamServiceImpl implements ExamService {
     public Questions addQuestion(Long examId, Questions question) {
         Exam exam = examRepo.findById(examId).orElseThrow();
         question.setExam(exam);
-        // Gán ngược câu hỏi cho từng đáp án để JPA hiểu mối quan hệ
         if (question.getOptions() != null) {
             question.getOptions().forEach(opt -> opt.setQuestion(question));
         }
@@ -66,6 +65,7 @@ public class ExamServiceImpl implements ExamService {
         return stats;
     }
 
+    @Override
     public Exam toggleExamStatus(Long id) {
         Optional<Exam> optionalExam = examRepo.findById(id);
         if (optionalExam.isPresent()) {
@@ -76,26 +76,43 @@ public class ExamServiceImpl implements ExamService {
         return null;
     }
 
-    // Chức năng đảo đề: Đảo ngẫu nhiên câu hỏi và các đáp án bên trong
     @Override
-    public Exam shuffleExam(Long examId) {
+    public Exam toggleShuffleStatus(Long id) {
+        Optional<Exam> optionalExam = examRepo.findById(id);
+        if (optionalExam.isPresent()) {
+            Exam exam = optionalExam.get();
+            // Đổi trạng thái đảo đề động dựa trên thuộc tính mới
+            exam.setShuffled(exam.getShuffled() == null ? true : !exam.getShuffled());
+            return examRepo.save(exam);
+        }
+        return null;
+    }
+
+    @Override
+    @Transactional
+    public Exam getExamForStudent(Long examId) {
         Optional<Exam> optionalExam = examRepo.findById(examId);
         if (optionalExam.isPresent()) {
             Exam exam = optionalExam.get();
             
-            // 1. Đảo ngẫu nhiên danh sách câu hỏi
-            if (exam.getQuestions() != null && !exam.getQuestions().isEmpty()) {
-                Collections.shuffle(exam.getQuestions());
-                
-                // 2. Đảo ngẫu nhiên danh sách đáp án (Options) của từng câu hỏi
-                for (Questions question : exam.getQuestions()) {
-                    if (question.getOptions() != null && !question.getOptions().isEmpty()) {
-                        Collections.shuffle(question.getOptions());
+            // Tự động kiểm tra trạng thái đảo đề động
+            if (exam.getShuffled() != null && exam.getShuffled()) {
+                if (exam.getQuestions() != null && !exam.getQuestions().isEmpty()) {
+                    Collections.shuffle(exam.getQuestions());
+                    for (Questions question : exam.getQuestions()) {
+                        if (question.getOptions() != null && !question.getOptions().isEmpty()) {
+                            Collections.shuffle(question.getOptions());
+                        }
                     }
                 }
             }
-            return exam; 
+            return exam;
         }
         return null;
+    }
+
+    @Override
+    public Exam shuffleExam(Long examId) {
+        return getExamForStudent(examId);
     }
 }

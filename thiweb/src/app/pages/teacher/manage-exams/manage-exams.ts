@@ -4,11 +4,12 @@ import { Exam } from '../../../service/exam';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
+import { HttpClient, HttpClientModule } from '@angular/common/http'; // THÊM: Import HttpClient
 
 @Component({
   selector: 'app-manage-exams',
   standalone: true, 
-  imports: [SharedModule, NzTooltipModule],
+  imports: [SharedModule, NzTooltipModule, HttpClientModule], // THÊM: HttpClientModule vào imports
   templateUrl: './manage-exams.html',
   styleUrl: './manage-exams.scss',
 })
@@ -23,6 +24,7 @@ export class ManageExams implements OnInit {
     private router: Router,
     private cdr: ChangeDetectorRef,
     private message: NzMessageService,
+    private http: HttpClient, // THÊM: Inject HttpClient trực tiếp vào Constructor
   ) {}
 
   ngOnInit(): void {
@@ -39,22 +41,34 @@ export class ManageExams implements OnInit {
       error: (err) => console.error(err),
     });
   }
-
-  // dao de
+  onToggleShuffle(exam: any): void {
+    this.http.put(`http://localhost:8080/api/user-exams/${exam.id}/toggle-shuffle`, {}).subscribe({
+      next: (updatedExam: any) => {
+        exam.shuffled = updatedExam.shuffled;
+        
+        if (exam.shuffled) {
+          this.message.success('Đã kích hoạt chế độ đảo đề tự động cho học sinh!');
+        } else {
+          this.message.info('Đã tắt chế độ đảo đề.');
+        }
+        
+        this.exams = [...this.exams];
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.message.error('Lỗi khi thay đổi cấu hình đảo đề!');
+        console.error('Lỗi chi tiết:', err);
+      }
+    });
+  }
   onShuffle(id: number): void {
     this.examService.shuffleExam(id).subscribe({
       next: (res) => {
         this.message.success('Đã đảo ngẫu nhiên câu hỏi và đáp án thành công!');
-        
-        //  tim de thi vua dao va cap nhat du lieu moi
         const index = this.exams.findIndex(e => e.id === id);
         if (index !== -1) {
-          // hien du lieu moi
           this.exams[index] = res;
-
           this.exams[index].expand = true; 
-          
-          // hien ngay lap tuc
           this.exams = [...this.exams];
           this.cdr.detectChanges();
         }
