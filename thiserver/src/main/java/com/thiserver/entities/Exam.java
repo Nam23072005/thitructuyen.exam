@@ -1,5 +1,6 @@
 package com.thiserver.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -7,7 +8,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "exams")
-@Data // Tự động tạo Getter, Setter, toString...
+@Data
 public class Exam {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,4 +22,7 @@ public class Exam {
 
     @OneToMany(mappedBy = "exam", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Questions> questions;
+    @ManyToMany(mappedBy = "allowedExams")
+    @JsonIgnore
+    private List<Classroom> classrooms;
 }

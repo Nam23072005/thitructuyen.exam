@@ -1,0 +1,141 @@
+<div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+  <div>
+    <h2 style="margin-bottom: 4px;">Lớp học: {{ classroomData?.name}}</h2>
+    <p style="margin: 0; color: #666;">Sĩ số: <strong>{{ students.length }}</strong> học sinh</p>
+  </div>
+  
+  <button nz-button nzType="primary" nzSize="large" (click)="showAssignExamModal()">
+    <span nz-icon nzType="file-add"></span> Giao đề thi cho lớp này
+  </button>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 24px;">
+  
+  <section style="background: #fff; padding: 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+    <h3 style="margin-bottom: 16px;">Danh sách Học sinh</h3>
+    <nz-table #studentTable [nzData]="students" [nzLoading]="loadingStudents" nzBordered>
+      <thead>
+        <tr>
+          <th>Tên học sinh</th>
+          <th>Email</th>
+          <th nzWidth="150px">Trạng thái</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (student of students; track student.id) {
+          <tr>
+            <td><strong>{{ student.name }}</strong></td>
+            <td>{{ student.email }}</td>
+            <td><nz-tag nzColor="blue">Đang học</nz-tag></td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="3" style="text-align: center;">
+              <nz-empty nzNotFoundContent="Lớp này hiện chưa có học sinh nào đăng ký"></nz-empty>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </section>
+
+  <section style="background: #fff; padding: 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+    <h3 style="margin-bottom: 16px;">Đề thi đã giao cho lớp</h3>
+    <nz-table #examTable [nzData]="assignedExams" [nzLoading]="loadingExams" nzBordered>
+      <thead>
+        <tr>
+          <th nzWidth="80px">ID Đề</th>
+          <th>Tên Đề thi</th>
+          <th nzWidth="150px">Thời gian</th>
+          <th nzWidth="150px">Trạng thái</th>
+          <th nzWidth="120px">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (exam of assignedExams; track exam.id) {
+          <tr>
+            <td>{{ exam.id }}</td>
+            <td><strong>{{ exam.title }}</strong></td>
+            <td>{{ exam.duration }} phút</td>
+            <td>
+              <nz-tag [nzColor]="exam.active ? 'success' : 'default'">
+                {{ exam.active ? 'Đang mở' : 'Đang đóng' }}
+              </nz-tag>
+            </td>
+            <td>
+              <button 
+                nz-button 
+                nzType="primary" 
+                nzDanger 
+                nz-popconfirm
+                nzPopconfirmTitle="Hủy giao đề thi này?"
+                nzOkText="Xóa"
+                nzCancelText="Hủy"
+                (nzOnConfirm)="removeExam(exam.id)">
+                <span nz-icon nzType="delete"></span> Xóa
+              </button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5" style="text-align: center;">
+              <nz-empty nzNotFoundContent="Lớp này chưa được giao đề thi nào"></nz-empty>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </section>
+
+  <section style="background: #fff; padding: 16px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);">
+    <h3 style="margin-bottom: 16px;">Bảng điểm &amp; Kết quả thi</h3>
+    <nz-table #resultTable [nzData]="results" [nzLoading]="loadingResults" nzBordered>
+      <thead>
+        <tr>
+          <th>Tên Học sinh</th>
+          <th>Đề thi</th>
+          <th>Điểm số</th>
+          <th>Ngày làm bài</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (res of results; track res.id) {
+          <tr>
+            <td><strong>{{ res.user?.name }}</strong></td>
+            <td>{{ res.exam?.title }}</td>
+            <td>
+              <nz-badge [nzStatus]="res.score >= 5 ? 'success' : 'error'"></nz-badge>
+              <strong style="font-size: 16px;">{{ res.score }}</strong> / 10
+            </td>
+            <td>{{ res.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="4" style="text-align: center;">
+              <nz-empty nzNotFoundContent="Chưa có học sinh nào trong lớp làm bài thi"></nz-empty>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </section>
+  
+</div>
+
+<nz-modal 
+  [(nzVisible)]="isModalVisible" 
+  nzTitle="Cấu hình Đề thi được phép cho Lớp" 
+  (nzOnCancel)="handleCancel()" 
+  (nzOnOk)="handleAssignExam()"
+  nzOkText="Xác nhận lưu"
+  nzCancelText="Hủy">
+  <ng-container *nzModalContent>
+    <p style="color: #666;">Sau khi giao đề, chỉ những học sinh thuộc lớp này mới nhìn thấy và bấm làm bài được đề thi này.</p>
+    <div style="margin-bottom: 8px; font-weight: bold;">Chọn đề thi:</div>
+    <nz-select [(ngModel)]="selectedExamId" nzPlaceHolder="-- Chọn đề thi cần giao --" style="width: 100%;">
+      @for (exam of availableExams; track exam.id) {
+        <nz-option [nzValue]="exam.id" [nzLabel]="exam.title"></nz-option>
+      }
+    </nz-select>
+  </ng-container>
+</nz-modal>

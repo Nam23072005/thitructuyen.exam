@@ -1,0 +1,32 @@
+<div style="margin-bottom: 16px;">
+  <h2>Quản lý Lớp học</h2>
+</div>
+
+<nz-table #classTable [nzData]="classes" [nzLoading]="loading" nzBordered>
+  <thead>
+    <tr>
+      <th nzWidth="80px">ID</th>
+      <th>Tên Lớp</th>
+      <th nzWidth="300px">Thao tác</th>
+    </tr>
+  </thead>
+  <tbody>
+    @for (c of classes; track c.id) {
+      <tr>
+        <td>{{ c.id }}</td>
+        <td><strong>{{ c.name }}</strong></td>
+        <td>
+          <a nz-button nzType="link" [routerLink]="['/teacher/class-details', c.id]">
+            <span nz-icon nzType="eye"></span> Chi tiết & Giao đề
+          </a>
+        </td>
+      </tr>
+    } @empty {
+      <tr>
+        <td colspan="3" style="text-align: center;">
+          <nz-empty nzNotFoundContent="Bạn chưa quản lý lớp học nào"></nz-empty>
+        </td>
+      </tr>
+    }
+  </tbody>
+</nz-table>

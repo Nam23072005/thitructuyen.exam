@@ -61,15 +61,21 @@ export class StudentExamComponent implements OnInit, OnDestroy {
       if (this.seconds > 0) {
         this.seconds--;
         this.formatTime();
+        
+        // BỔ SUNG DÒNG NÀY: Ép Angular cập nhật đồng hồ mỗi giây
+        this.cdr.detectChanges(); 
 
         if (this.seconds === 600) {
           this.showWarning = true;
-          setTimeout(() => this.showWarning = false, 3000);
+          setTimeout(() => {
+            this.showWarning = false;
+            this.cdr.detectChanges(); // Ép cập nhật lại khi tắt popup cảnh báo
+          }, 3000);
         }
       } else {
         this.stopTimer();
         alert('Đã hết thời gian làm bài! Hệ thống sẽ tự động nộp bài.');
-        this.submitExam(true); // Nộp bài tự động khi hết giờ
+        this.submitExam(true); 
       }
     }, 1000);
   }
@@ -124,7 +130,7 @@ export class StudentExamComponent implements OnInit, OnDestroy {
         next: (res: any) => {
           this.stopTimer(); // Dừng timer ngay khi nộp thành công
           alert(`Nộp bài thành công! Điểm của bạn: ${res.score}`);
-          this.router.navigate(['/student-dashboard']);
+          this.router.navigate(['/student/dashboard']);
         },
         error: (err) => {
           console.error('Lỗi nộp bài:', err);

@@ -1,13 +1,23 @@
 <h2 style="margin-bottom: 20px;">Danh sách bài thi đang mở</h2>
-<div nz-row [nzGutter]="16">
-  <div nz-col [nzSpan]="12">
-    <nz-card nzTitle="Kiểm tra Java Spring Boot - 15 phút" [nzExtra]="extraTemplate">
-      <p>Số câu hỏi: 20</p>
-      <p>Thời gian làm bài: 15 phút</p>
-      <p>Trạng thái: <nz-tag nzColor="green">Đang mở</nz-tag></p>
-    </nz-card>
-    <ng-template #extraTemplate>
-    <button nz-button nzType="link" [routerLink]="['/student/exam', 1]">Vào thi ngay</button>
-    </ng-template>
-  </div>
-</div>
+
+<nz-row [nzGutter]="16">
+  @for (exam of exams; track exam.id) {
+    <div nz-col [nzSpan]="12" style="margin-bottom: 16px;">
+      <nz-card [nzTitle]="exam.title" [nzExtra]="extraTemplate">
+        <p>Thời gian làm bài: <strong>{{ exam.duration }} phút</strong></p>
+        <p style="margin: 0;">Mô tả: {{ exam.description || 'Không có mô tả' }}</p>
+        <p style="margin-top: 8px;">Trạng thái: <nz-tag nzColor="green">Đang mở</nz-tag></p>
+        
+        <ng-template #extraTemplate>
+          <button nz-button nzType="link" [routerLink]="['/student/exam', exam.id]">
+            Vào thi ngay
+          </button>
+        </ng-template>
+      </nz-card>
+    </div>
+  } @empty {
+    <div style="width: 100%; text-align: center; margin-top: 40px;">
+      <nz-empty nzNotFoundContent="Lớp của bạn hiện chưa được giao đề thi nào!"></nz-empty>
+    </div>
+  }
+</nz-row>

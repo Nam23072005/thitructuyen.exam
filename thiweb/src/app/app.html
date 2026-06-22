@@ -1,12 +1,9 @@
-<!-- Cấu trúc tách biệt hoàn toàn để ép trang thi chiếm toàn màn hình -->
 @if (shouldHideLayout()) {
-  <!-- TRƯỜNG HỢP 1: TRANG THI (Không dùng nz-layout hệ thống) -->
   <div style="width: 100vw; height: 100vh; overflow: hidden;">
     <router-outlet></router-outlet>
   </div>
 } 
 @else {
-  <!-- TRƯỜNG HỢP 2: CÁC TRANG DASHBOARD THÔNG THƯỜNG -->
   <nz-layout class="app-layout">
     <nz-header class="main-header" style="background-color: darkolivegreen; display: flex; justify-content: space-between; align-items: center;">
       <div>
@@ -38,6 +35,11 @@
                 <li nz-menu-item nzMatchRouter>
                   <a style="color: #1890ff" routerLink="/teacher/manage-exams"><span nz-icon nzType="form"></span> Quản lý đề thi</a>
                 </li>
+                
+                <li nz-menu-item nzMatchRouter>
+                  <a style="color: #1890ff" routerLink="/teacher/classes"><span nz-icon nzType="team"></span> Quản lý lớp học</a>
+                </li>
+                
               </ul>
             </li>
           }

@@ -1,10 +1,7 @@
 package com.thiserver.entities;
 
 import com.thiserver.enums.UserRole;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
@@ -19,4 +16,9 @@ public class User {
     private String password;
 
     private UserRole role;
+    @ManyToOne
+    @JoinColumn(name = "class_id")
+    private Classroom classroom;
+    @Transient
+    private String classroomName;
 }
