@@ -15,8 +15,18 @@ import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
 export class ManageExams implements OnInit {
   isVisible = false;
   isConfirmLoading = false;
+  isEditMode = false;
+  editingExamId: number | null = null;
   exams: any[] = [];
   teacherId = localStorage.getItem('user_id') || '';
+
+  newExam = {
+    title: '',
+    description: '',
+    duration: 60,
+    maxAttempts: 1, 
+    teacherId: localStorage.getItem('user_id'),
+  };
 
   constructor(
     private examService: Exam,
@@ -40,48 +50,55 @@ export class ManageExams implements OnInit {
     });
   }
 
-  // dao de
-  onShuffle(id: number): void {
-    this.examService.shuffleExam(id).subscribe({
-      next: (res) => {
-        this.message.success('Đã đảo ngẫu nhiên câu hỏi và đáp án thành công!');
-        
-        //  tim de thi vua dao va cap nhat du lieu moi
-        const index = this.exams.findIndex(e => e.id === id);
-        if (index !== -1) {
-          // hien du lieu moi
-          this.exams[index] = res;
-
-          this.exams[index].expand = true; 
-          
-          // hien ngay lap tuc
-          this.exams = [...this.exams];
-          this.cdr.detectChanges();
-        }
-      },
-      error: (err) => {
-        this.message.error('Lỗi khi thực hiện đảo đề!');
-        console.error('Lỗi chi tiết:', err);
-      }
-    });
-  }
-
   onDelete(id: number) {
-    this.examService.deleteExam(id).subscribe(() => {
-      this.message.success('Đã xóa đề thi');
-      this.loadExams();
-    });
+    if (confirm('Bạn có chắc chắn muốn xóa đề thi này không?')) {
+      this.examService.deleteExam(id).subscribe(() => {
+        this.message.success('Đã xóa đề thi');
+        this.loadExams();
+      });
+    }
   }
-
-  newExam = {
-    title: '',
-    description: '',
-    duration: 60,
-    teacherId: localStorage.getItem('user_id'),
-  };
 
   showModal(): void {
+    this.isEditMode = false;
+    this.editingExamId = null;
+    
+    // 1. Mở modal rỗng trước
     this.isVisible = true;
+    this.cdr.detectChanges();
+
+    // 2. Nạp dữ liệu mặc định sau để tránh lỗi kiểm tra chu kỳ (NG0100)
+    setTimeout(() => {
+      this.newExam = {
+        title: '',
+        description: '',
+        duration: 60,
+        maxAttempts: 1,
+        teacherId: localStorage.getItem('user_id'),
+      };
+      this.cdr.detectChanges();
+    });
+  }
+
+  onEdit(exam: any): void {
+    this.isEditMode = true;
+    this.editingExamId = exam.id;
+    
+    // 1. Mở khung modal trước
+    this.isVisible = true;
+    this.cdr.detectChanges();
+
+    // 2. Đổ dữ liệu của đề cần sửa vào form ở chu kỳ tiếp theo
+    setTimeout(() => {
+      this.newExam = {
+        title: exam.title,
+        description: exam.description,
+        duration: exam.duration,
+        maxAttempts: exam.maxAttempts || 1,
+        teacherId: localStorage.getItem('user_id'),
+      };
+      this.cdr.detectChanges();
+    }, 10); // delay 10ms để dứt khoát chu kỳ render modal của Ng-Zorro
   }
 
   handleCancel(): void {
@@ -90,18 +107,36 @@ export class ManageExams implements OnInit {
 
   handleOk(): void {
     this.isConfirmLoading = true;
-    this.examService.saveExam(this.newExam).subscribe({
-      next: (res) => {
-        this.isVisible = false;
-        this.isConfirmLoading = false;
-        this.message.success('Tạo đề thành công!');
-        this.router.navigate(['/teacher/add-question', res.id]);
-      },
-      error: (err) => {
-        this.isConfirmLoading = false;
-        this.message.error('Lỗi khi tạo đề');
-      },
-    });
+
+    if (this.isEditMode && this.editingExamId) {
+      const updatedData = { id: this.editingExamId, ...this.newExam };
+      
+      this.examService.saveExam(updatedData).subscribe({
+        next: () => {
+          this.isVisible = false;
+          this.isConfirmLoading = false;
+          this.message.success('Cập nhật đề thi thành công!');
+          this.loadExams();
+        },
+        error: (err) => {
+          this.isConfirmLoading = false;
+          this.message.error('Lỗi khi cập nhật đề thi');
+        }
+      });
+    } else {
+      this.examService.saveExam(this.newExam).subscribe({
+        next: (res) => {
+          this.isVisible = false;
+          this.isConfirmLoading = false;
+          this.message.success('Tạo đề thành công!');
+          this.router.navigate(['/teacher/add-question', res.id]);
+        },
+        error: (err) => {
+          this.isConfirmLoading = false;
+          this.message.error('Lỗi khi tạo đề');
+        },
+      });
+    }
   }
 
   onToggleStatus(exam: any): void {

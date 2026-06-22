@@ -12,9 +12,12 @@ import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { SharedModule } from '../../../modules/shared/shared-module';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip'; // THÊM DÒNG NÀY
 
 @Component({
   selector: 'app-class-details',
+  standalone: true,
   imports: [
     SharedModule, 
     FormsModule,
@@ -25,7 +28,9 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
     NzBadgeModule, 
     NzTagModule, 
     NzEmptyModule,
-    NzPopconfirmModule
+    NzPopconfirmModule,
+    HttpClientModule,
+    NzTooltipModule // THÊM DÒNG NÀY vào mảng imports
   ],
   templateUrl: './class-details.html',
   styleUrl: './class-details.scss',
@@ -33,22 +38,24 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 export class ClassDetails implements OnInit {
   classId!: number;
   students: any[] = [];
-  results: any[] = []; // Thêm biến lưu kết quả thi
+  results: any[] = [];
   availableExams: any[] = [];
   classroomData: any = null;
   loadingStudents = false;
   loadingResults = false;
   isModalVisible = false;
   selectedExamId: number | null = null;
-  assignedExams: any[] = []; // Mảng lưu đề thi đã giao
+  assignedExams: any[] = [];
   loadingExams = false;
 
   constructor(
     private route: ActivatedRoute,
     private classroomService: ClassroomService,
     private message: NzMessageService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private http: HttpClient
   ) {}
+
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       if (params['id']) {
@@ -56,7 +63,7 @@ export class ClassDetails implements OnInit {
         this.loadClassroomDetails();
         this.loadStudents();
         this.loadClassResults();
-        this.loadAssignedExams(); // Tải điểm khi vào trang
+        this.loadAssignedExams();
       }
     });
   }
@@ -85,12 +92,32 @@ export class ClassDetails implements OnInit {
     });
   }
 
-  // HÀM XỬ LÝ XÓA ĐỀ THI KHỎI LỚP
+  onToggleShuffle(exam: any): void {
+    this.http.put(`http://localhost:8080/api/user-exams/${exam.id}/toggle-shuffle`, {}).subscribe({
+      next: (updatedExam: any) => {
+        exam.shuffled = updatedExam.shuffled;
+        
+        if (exam.shuffled) {
+          this.message.success(`Đã bật chế độ đảo đề thi "${exam.title}" cho lớp này!`);
+        } else {
+          this.message.info(`Đã tắt chế độ đảo đề thi "${exam.title}".`);
+        }
+        
+        this.assignedExams = [...this.assignedExams];
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.message.error('Không thể cập nhật cấu hình đảo đề. Vui lòng kiểm tra lại!');
+        console.error('Lỗi chi tiết:', err);
+      }
+    });
+  }
+
   removeExam(examId: number): void {
     this.classroomService.removeExamFromClass(this.classId, examId).subscribe({
       next: (res) => {
         this.message.success('Đã xóa đề thi khỏi lớp này!');
-        this.loadAssignedExams(); // Tải lại danh sách đề sau khi xóa xong
+        this.loadAssignedExams();
         this.cdr.detectChanges();
       },
       error: () => this.message.error('Lỗi khi xóa đề thi!')
@@ -129,8 +156,6 @@ export class ClassDetails implements OnInit {
 
   showAssignExamModal(): void {
     this.isModalVisible = true;
-    
-    // Gọi API lấy danh sách đề thi đổ vào Dropdown
     this.classroomService.getAllExams().subscribe({
       next: (res) => {
         this.availableExams = res;
@@ -158,7 +183,7 @@ export class ClassDetails implements OnInit {
         this.isModalVisible = false;
         this.selectedExamId = null;
         this.loadAssignedExams();
-        this.cdr.detectChanges(); // <--- THÊM DÒNG NÀY để giao xong nó tự hiện vào bảng luôn!
+        this.cdr.detectChanges();
       },
       error: () => this.message.error('Lỗi khi giao đề thi!')
     });

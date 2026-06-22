@@ -20,8 +20,16 @@ public class Exam {
     private Long teacherId;
     private boolean active = true;
 
+    @Column(name = "is_shuffled")
+    private boolean shuffled = false; 
+
+    // gioi han lam 1 lan ( mac dinh)
+    @Column(name = "max_attempts")
+    private int maxAttempts = 1;
+
     @OneToMany(mappedBy = "exam", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Questions> questions;
+
     @ManyToMany(mappedBy = "allowedExams")
     @JsonIgnore
     private List<Classroom> classrooms;

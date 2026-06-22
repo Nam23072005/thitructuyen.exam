@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import com.thiserver.entities.Exam;
 import com.thiserver.entities.Questions;
-import com.thiserver.entities.Result; // Thêm thư viện để đảo danh sách
+import com.thiserver.entities.Result;
 import com.thiserver.repository.ExamRepository;
 import com.thiserver.repository.QuestionRepository;
 import com.thiserver.repository.ResultRepository;
@@ -25,8 +25,21 @@ public class ExamServiceImpl implements ExamService {
     @Autowired private ResultRepository resultRepo;
 
     @Override
-    public Exam createOrUpdateExam(Exam exam) {
-        return examRepo.save(exam);
+    public Exam createOrUpdateExam(Exam examDto) {
+        if (examDto.getId() != null) {
+            return examRepo.findById(examDto.getId()).map(existingExam -> {
+                existingExam.setTitle(examDto.getTitle());
+                existingExam.setDescription(examDto.getDescription());
+                existingExam.setDuration(examDto.getDuration());
+                existingExam.setMaxAttempts(examDto.getMaxAttempts());
+          
+                if (examDto.getTeacherId() != null) {
+                    existingExam.setTeacherId(examDto.getTeacherId());
+                }
+                return examRepo.save(existingExam);
+            }).orElseThrow(() -> new RuntimeException("Không tìm thấy đề thi với ID: " + examDto.getId()));
+        }
+        return examRepo.save(examDto);
     }
 
     @Override
@@ -44,7 +57,6 @@ public class ExamServiceImpl implements ExamService {
     public Questions addQuestion(Long examId, Questions question) {
         Exam exam = examRepo.findById(examId).orElseThrow();
         question.setExam(exam);
-        // Gán ngược câu hỏi cho từng đáp án để JPA hiểu mối quan hệ
         if (question.getOptions() != null) {
             question.getOptions().forEach(opt -> opt.setQuestion(question));
         }
@@ -76,18 +88,15 @@ public class ExamServiceImpl implements ExamService {
         return null;
     }
 
-    // Chức năng đảo đề: Đảo ngẫu nhiên câu hỏi và các đáp án bên trong
     @Override
     public Exam shuffleExam(Long examId) {
         Optional<Exam> optionalExam = examRepo.findById(examId);
         if (optionalExam.isPresent()) {
             Exam exam = optionalExam.get();
             
-            // 1. Đảo ngẫu nhiên danh sách câu hỏi
             if (exam.getQuestions() != null && !exam.getQuestions().isEmpty()) {
                 Collections.shuffle(exam.getQuestions());
                 
-                // 2. Đảo ngẫu nhiên danh sách đáp án (Options) của từng câu hỏi
                 for (Questions question : exam.getQuestions()) {
                     if (question.getOptions() != null && !question.getOptions().isEmpty()) {
                         Collections.shuffle(question.getOptions());

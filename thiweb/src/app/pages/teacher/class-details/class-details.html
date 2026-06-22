@@ -48,8 +48,7 @@
           <th>Tên Đề thi</th>
           <th nzWidth="150px">Thời gian</th>
           <th nzWidth="150px">Trạng thái</th>
-          <th nzWidth="120px">Thao tác</th>
-        </tr>
+          <th nzWidth="220px">Thao tác</th> </tr>
       </thead>
       <tbody>
         @for (exam of assignedExams; track exam.id) {
@@ -63,6 +62,19 @@
               </nz-tag>
             </td>
             <td>
+              <button nz-button nzType="link" (click)="onToggleShuffle(exam)" 
+                      [nzTooltipTitle]="exam.shuffled ? 'Tắt chế độ xáo trộn đề' : 'Bật chế độ xáo trộn đề'" nz-tooltip>
+                @if (exam.shuffled) {
+                  <span nz-icon nzType="check-square" style="color: #52c41a;"></span>
+                  <span style="color: #52c41a; margin-left: 4px; font-weight: 500;">Đề đã được đảo</span>
+                } @else {
+                  <span nz-icon nzType="border" style="color: #8c8c8c;"></span>
+                  <span style="color: #1890ff; margin-left: 4px;">Đảo đề</span>
+                }
+              </button>
+
+              <nz-divider nzType="vertical"></nz-divider>
+
               <button 
                 nz-button 
                 nzType="primary" 

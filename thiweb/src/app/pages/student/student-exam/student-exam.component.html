@@ -5,17 +5,26 @@
     </div>
 
     <div class="questions-list">
-      <div class="question-container" *ngFor="let q of questions; let i = index" [id]="'question-' + i">
-           <div class="question-header">
+      @for (q of questions; track q.id; let i = $index) {
+        <div class="question-container" [id]="'question-' + i">
+          <div class="question-header">
             Câu {{ i + 1 }}: {{ q.content }}
           </div>
-        <nz-radio-group class="options-row" [(ngModel)]="selectedAnswers[q.id]" (ngModelChange)="selectOption(q.id, $event)">
-          <label nz-radio *ngFor="let opt of q.options; let idx = index" [nzValue]="opt.id">
-            <span class="option-label">{{ ['A', 'B', 'C', 'D'][idx] }}.</span>
-            <span class="option-text">{{ opt.optionText }}</span>
-          </label>
-        </nz-radio-group>
-      </div>
+          
+          <nz-radio-group class="options-row" [(ngModel)]="selectedAnswers[q.id]" (ngModelChange)="selectOption(q.id, $event)">
+            @for (opt of q.options; track opt.id; let idx = $index) {
+              <label nz-radio [nzValue]="opt.id">
+                <span class="option-label">{{ ['A', 'B', 'C', 'D'][idx] }}.</span>
+                <span class="option-text">{{ opt.optionText }}</span>
+              </label>
+            }
+          </nz-radio-group>
+        </div>
+      } @empty {
+        <div style="text-align: center; margin-top: 50px; padding: 20px;">
+          <nz-spin nzSimple nzTip="Đang tải danh sách câu hỏi xáo trộn từ hệ thống..."></nz-spin>
+        </div>
+      }
     </div>
   </div>
 
@@ -23,12 +32,13 @@
     <div class="sidebar-body">
       <p class="section-title">Danh sách câu hỏi</p>
       <div class="question-nav-grid">
-        <div class="nav-item" 
-             *ngFor="let q of questions; let i = index"
-             [class.done]="selectedAnswers[q.id]"
-             (click)="scrollToQuestion(i)">
-          {{ i + 1 }}
-        </div>
+        @for (q of questions; track q.id; let i = $index) {
+          <div class="nav-item" 
+               [class.done]="selectedAnswers[q.id]"
+               (click)="scrollToQuestion(i)">
+            {{ i + 1 }}
+          </div>
+        }
       </div>
     </div>
 
