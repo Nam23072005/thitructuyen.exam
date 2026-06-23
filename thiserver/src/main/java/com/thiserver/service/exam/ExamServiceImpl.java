@@ -1,5 +1,6 @@
 package com.thiserver.service.exam;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.thiserver.entities.Exam;
 import com.thiserver.entities.Questions;
+import com.thiserver.entities.Options;
 import com.thiserver.entities.Result;
 import com.thiserver.repository.ExamRepository;
 import com.thiserver.repository.QuestionRepository;
@@ -32,7 +34,6 @@ public class ExamServiceImpl implements ExamService {
                 existingExam.setDescription(examDto.getDescription());
                 existingExam.setDuration(examDto.getDuration());
                 existingExam.setMaxAttempts(examDto.getMaxAttempts());
-          
                 if (examDto.getTeacherId() != null) {
                     existingExam.setTeacherId(examDto.getTeacherId());
                 }
@@ -40,6 +41,47 @@ public class ExamServiceImpl implements ExamService {
             }).orElseThrow(() -> new RuntimeException("Không tìm thấy đề thi với ID: " + examDto.getId()));
         }
         return examRepo.save(examDto);
+    }
+
+    // BỔ SUNG HÀM LOGIC ĐẢO ĐỀ CHUẨN Ở TẦNG SERVICE
+    @Override
+    public List<Questions> getShuffledQuestionsForStudent(Long examId) {
+        Exam exam = examRepo.findById(examId).orElse(null);
+        if (exam == null || exam.getQuestions() == null) {
+            return new ArrayList<>();
+        }
+
+        List<Questions> originalQuestions = exam.getQuestions();
+        List<Questions> shuffledQuestions = new ArrayList<>();
+
+        // Thực hiện sao chép sâu (Deep Copy) để tránh làm xáo trộn dữ liệu gốc trong DB
+        for (Questions q : originalQuestions) {
+            Questions newQ = new Questions();
+            newQ.setId(q.getId());
+            newQ.setContent(q.getContent());
+            
+            if (q.getOptions() != null) {
+                List<Options> shuffledOptions = new ArrayList<>();
+                for (Options o : q.getOptions()) {
+                    Options newO = new Options();
+                    newO.setId(o.getId());
+                    newO.setOptionText(o.getOptionText());
+                    newO.setCorrect(o.isCorrect());
+                    shuffledOptions.add(newO);
+                }
+                // Trộn đáp án nếu cấu hình đề cho phép (hoặc mặc định trộn)
+                Collections.shuffle(shuffledOptions);
+                newQ.setOptions(shuffledOptions);
+            }
+            shuffledQuestions.add(newQ);
+        }
+
+        // Trộn thứ tự các câu hỏi
+        if (!shuffledQuestions.isEmpty()) {
+            Collections.shuffle(shuffledQuestions);
+        }
+
+        return shuffledQuestions;
     }
 
     @Override
@@ -93,10 +135,8 @@ public class ExamServiceImpl implements ExamService {
         Optional<Exam> optionalExam = examRepo.findById(examId);
         if (optionalExam.isPresent()) {
             Exam exam = optionalExam.get();
-            
             if (exam.getQuestions() != null && !exam.getQuestions().isEmpty()) {
                 Collections.shuffle(exam.getQuestions());
-                
                 for (Questions question : exam.getQuestions()) {
                     if (question.getOptions() != null && !question.getOptions().isEmpty()) {
                         Collections.shuffle(question.getOptions());

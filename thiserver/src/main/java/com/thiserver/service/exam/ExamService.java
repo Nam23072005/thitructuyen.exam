@@ -16,4 +16,5 @@ public interface ExamService {
     
     // dao de
     Exam shuffleExam(Long examId);
+    List<Questions> getShuffledQuestionsForStudent(Long examId);
 }
