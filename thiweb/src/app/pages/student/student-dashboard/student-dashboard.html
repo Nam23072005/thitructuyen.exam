@@ -1,23 +1,31 @@
 <h2 style="margin-bottom: 20px;">Danh sách bài thi đang mở</h2>
-
-<nz-row [nzGutter]="16">
-  @for (exam of exams; track exam.id) {
-    <div nz-col [nzSpan]="12" style="margin-bottom: 16px;">
-      <nz-card [nzTitle]="exam.title" [nzExtra]="extraTemplate">
-        <p>Thời gian làm bài: <strong>{{ exam.duration }} phút</strong></p>
-        <p style="margin: 0;">Mô tả: {{ exam.description || 'Không có mô tả' }}</p>
-        <p style="margin-top: 8px;">Trạng thái: <nz-tag nzColor="green">Đang mở</nz-tag></p>
-        
-        <ng-template #extraTemplate>
-          <button nz-button nzType="link" [routerLink]="['/student/exam', exam.id]">
-            Vào thi ngay
-          </button>
-        </ng-template>
-      </nz-card>
-    </div>
-  } @empty {
-    <div style="width: 100%; text-align: center; margin-top: 40px;">
-      <nz-empty nzNotFoundContent="Lớp của bạn hiện chưa được giao đề thi nào!"></nz-empty>
-    </div>
-  }
-</nz-row>
+ 
+<div *ngIf="isLoading" style="text-align: center; padding: 40px;">
+  <nz-spin nzSimple></nz-spin>
+</div>
+ 
+<nz-empty
+  *ngIf="!isLoading && exams.length === 0"
+  nzNotFoundContent="Hiện chưa có bài thi nào đang mở">
+</nz-empty>
+ 
+<div nz-row [nzGutter]="[16, 16]" *ngIf="!isLoading && exams.length > 0">
+  <div nz-col [nzSpan]="12" *ngFor="let exam of exams">
+    <nz-card [nzTitle]="exam.title" [nzExtra]="extraTemplate">
+      <p>
+        <span nz-icon nzType="question-circle" style="margin-right: 6px;"></span>
+        Số câu hỏi: <b>{{ exam.questions?.length || 0 }}</b>
+      </p>
+      <p>
+        <span nz-icon nzType="clock-circle" style="margin-right: 6px;"></span>
+        Thời gian làm bài: <b>{{ exam.duration }} phút</b>
+      </p>
+    </nz-card>
+ 
+    <ng-template #extraTemplate>
+      <a nz-button nzType="link" [routerLink]="['/student/exam', exam.id]">
+        <span nz-icon nzType="play-circle"></span> Vào thi ngay
+      </a>
+    </ng-template>
+  </div>
+</div> 

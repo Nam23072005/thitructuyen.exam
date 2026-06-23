@@ -18,11 +18,12 @@ export class StudentExamComponent implements OnInit, OnDestroy {
   examId: number | null = null;
   userId: number | null = null;
   
-  // Logic đếm ngược thời gian
   remainingTime: string = "00:00"; 
   seconds: number = 0;
   timer: any;
-  showWarning: boolean = false; // Điều khiển popup thông báo còn 10 phút
+  showWarning: boolean = false; 
+  showResultModal: boolean = false;
+  submissionResult: any = null;
 
   constructor(
     private route: ActivatedRoute, 
@@ -41,12 +42,10 @@ export class StudentExamComponent implements OnInit, OnDestroy {
 
     if (idParam) {
       this.examId = Number(idParam);
-      // BƯỚC ĐẦU TIÊN: Kiểm tra số lượt làm bài trước khi nạp dữ liệu thi công khai
       this.checkExamAttemptsBeforeStart();
     }
   }
 
-  // TÍNH NĂNG MỚI: Check lượt làm bài bằng API check-attempts
   checkExamAttemptsBeforeStart() {
     if (!this.userId || !this.examId) {
       alert('Thông tin tài khoản hoặc mã đề không hợp lệ!');
@@ -58,16 +57,14 @@ export class StudentExamComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (res) => {
           if (res && res.allowed === false) {
-            // Nếu "allowed" trả về false từ Backend nghĩa là học sinh đã thi đủ/quá số lần cho phép
             alert(`Bạn đã hết lượt làm bài thi này! (Số lần đã làm: ${res.takenAttempts}/${res.maxAttempts})`);
             this.router.navigate(['/student/dashboard']);
           } else {
-            // Nếu còn lượt, cho phép tải dữ liệu cấu hình thời gian và câu hỏi bình thường
             this.loadExamData();
           }
         },
         error: (err) => {
-          console.error('Lỗi khi kiểm tra số lượt làm bài:', err);
+          console.error(err);
           alert('Không thể xác thực số lượt làm bài thi từ hệ thống!');
           this.router.navigate(['/student/dashboard']);
         }
@@ -75,26 +72,22 @@ export class StudentExamComponent implements OnInit, OnDestroy {
   }
 
   loadExamData() {
-    // 1. Gọi API lấy thông tin cấu hình chung (thời gian làm bài)
     this.http.get<any>(`http://localhost:8080/api/user-exams/${this.examId}`)
       .subscribe({
         next: (exam) => {
-          this.seconds = exam.duration * 60; // Chuyển đổi từ phút sang giây
+          this.seconds = exam.duration * 60; 
           this.formatTime();
           this.startCountdown();
-          
-          // 2. Gọi lồng tiếp API lấy danh sách câu hỏi (Có kèm param userId để Backend double check bảo mật)
           this.loadQuestionsData();
         },
         error: (err) => {
-          console.error('Lỗi khi tải dữ liệu cấu hình đề thi:', err);
+          console.error(err);
           alert('Không thể tải thông tin đề thi. Vui lòng kiểm tra lại Backend!');
         }
       });
   }
 
   loadQuestionsData() {
-    // Truyền thêm userId lên API câu hỏi để Backend chặn tầng cứng từ Controller nếu cố tình gọi trực tiếp API
     this.http.get<any[]>(`http://localhost:8080/api/user-exams/${this.examId}/questions?userId=${this.userId}`)
       .subscribe({
         next: (questionsData) => {
@@ -102,7 +95,7 @@ export class StudentExamComponent implements OnInit, OnDestroy {
           this.cdr.detectChanges(); 
         },
         error: (err) => {
-          console.error('Lỗi khi tải danh sách câu hỏi của đề:', err);
+          console.error(err);
           if (err.error && err.error.message) {
             alert(err.error.message);
           } else {
@@ -182,13 +175,19 @@ export class StudentExamComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (res: any) => {
           this.stopTimer(); 
-          alert(`Nộp bài thành công! Điểm của bạn: ${res.score}`);
-          this.router.navigate(['/student/dashboard']);
+          this.submissionResult = res;
+          this.showResultModal = true;
+          this.cdr.detectChanges();
         },
         error: (err) => {
-          console.error('Lỗi nộp bài:', err);
+          console.error(err);
           alert('Có lỗi xảy ra khi nộp bài.');
         }
       });
+  }
+
+  backToDashboard() {
+    this.showResultModal = false;
+    this.router.navigate(['/student/dashboard']);
   }
 }

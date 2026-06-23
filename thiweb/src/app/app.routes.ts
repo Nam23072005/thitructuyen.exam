@@ -7,10 +7,10 @@ import { ManageExams } from './pages/teacher/manage-exams/manage-exams';
 import { AddQuestion } from './pages/teacher/add-question/add-question';
 import { ExamStats } from './pages/teacher/exam-stats/exam-stats';
 import { StudentExamComponent } from './pages/student/student-exam/student-exam.component';
-import { ManageClassesComponent } from './pages/teacher/manage-classes/manage-classes';
-import { ClassDetails } from './pages/teacher/class-details/class-details';
+import { StudentHistory } from './pages/student/student-history/student-history.component';
 
 export const routes: Routes = [
+  { path: 'student/history', component: StudentHistory },
   { path: 'register', component: Signup },
   { path: 'login', component: Login },
   { path: 'teacher/dashboard', component: TeacherDashboard },
@@ -20,6 +20,5 @@ export const routes: Routes = [
   { path: 'teacher/add-question/:id', component: AddQuestion },
   { path: 'teacher/stats/:id', component: ExamStats },
   { path: 'student/exam/:id', component: StudentExamComponent },
-  { path: 'teacher/classes', component: ManageClassesComponent },
-  { path: 'teacher/class-details/:id', component: ClassDetails },
+  { path: '**', redirectTo: '/login' }
 ];

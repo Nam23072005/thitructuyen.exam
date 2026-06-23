@@ -23,8 +23,7 @@ import java.util.Map;
 @CrossOrigin(origins = "*", allowedHeaders = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.OPTIONS})
 public class ExamResultController {
 
-    @Autowired
-    private ResultService resultService;
+    private final ResultService resultService;
 
     @Autowired
     private ExamRepository examRepository;
@@ -34,6 +33,10 @@ public class ExamResultController {
 
     @Autowired
     private UserRepository userRepository;
+
+    ExamResultController(ResultService resultService) {
+        this.resultService = resultService;
+    }
 
     @PutMapping("/{id}/toggle-shuffle")
     public ResponseEntity<Exam> toggleShuffle(@PathVariable Long id) {

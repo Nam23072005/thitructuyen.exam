@@ -1,0 +1,39 @@
+<h2 style="margin-bottom: 20px;">Lịch sử thi</h2>
+
+<div *ngIf="isLoading" style="text-align: center; padding: 40px;">
+  <nz-spin nzSimple></nz-spin>
+</div>
+
+<nz-empty
+  *ngIf="!isLoading && history.length === 0"
+  nzNotFoundContent="Bạn chưa thi bài nào">
+</nz-empty>
+
+<nz-table
+  *ngIf="!isLoading && history.length > 0"
+  #historyTable
+  [nzData]="history"
+  nzBordered
+  nzSize="middle">
+  <thead>
+    <tr>
+      <th>Tên đề thi</th>
+      <th>Điểm số</th>
+      <th>Thời gian nộp</th>
+      <th>Kết quả</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr *ngFor="let item of historyTable.data">
+      <td>{{ item.exam?.title }}</td>
+      <td><b>{{ item.score }}</b> / 10</td>
+      <td>{{ item.submitTime | date:'HH:mm dd/MM/yyyy' }}</td>
+      <td>
+        <nz-badge
+          [nzStatus]="item.score >= 5 ? 'success' : 'error'"
+          [nzText]="item.score >= 5 ? 'Đạt' : 'Không đạt'">
+        </nz-badge>
+      </td>
+    </tr>
+  </tbody>
+</nz-table>
