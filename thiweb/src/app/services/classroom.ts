@@ -6,8 +6,8 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class ClassroomService {
-  // Thay đổi port nếu Backend của bạn chạy port khác nhé
-  private baseUrl = 'http://localhost:8080/api/classrooms';
+  private rootUrl = 'http://localhost:8080/api';
+  private baseUrl = `${this.rootUrl}/classrooms`;
 
   constructor(private http: HttpClient) { }
 
@@ -31,8 +31,7 @@ export class ClassroomService {
   }
 
   getClassResults(classId: number): Observable<any[]> {
-    // Sửa chữ results thành user-exams cho khớp với Java
-    return this.http.get<any[]>(`http://localhost:8080/api/user-exams/class/${classId}`);
+    return this.http.get<any[]>(`${this.rootUrl}/user-exams/class/${classId}`);
   }
 
   getClassroomById(id: number): Observable<any> {
@@ -40,7 +39,7 @@ export class ClassroomService {
   }
 
   getAllExams(): Observable<any[]> {
-    return this.http.get<any[]>('http://localhost:8080/api/user-exams/all'); 
+    return this.http.get<any[]>(`${this.rootUrl}/user-exams/all`); 
   }
 
   // Lấy các đề thi đã giao cho lớp
@@ -54,6 +53,31 @@ export class ClassroomService {
   }
   
   getStudentExams(studentId: number): Observable<any[]> {
-    return this.http.get<any[]>(`http://localhost:8080/api/user-exams/student/${studentId}/available-exams`);
+    return this.http.get<any[]>(`${this.rootUrl}/user-exams/student/${studentId}/available-exams`);
+  }
+
+  toggleExamShuffle(examId: number): Observable<any> {
+    return this.http.put<any>(`${this.rootUrl}/teacher/exams/${examId}/toggle-shuffle`, {});
+  }
+
+  submitExam(submission: any): Observable<any> {
+    return this.http.post<any>(`${this.rootUrl}/user-exams/submit`, submission);
+  }
+
+  // Chi tiết cấu hình đề thi
+  getExamDetail(examId: number): Observable<any> {
+    return this.http.get<any>(`${this.rootUrl}/user-exams/${examId}`);
+  }
+
+  // Danh sách câu hỏi gốc của đề thi
+  getExamQuestions(examId: number, userId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.rootUrl}/user-exams/${examId}/questions?userId=${userId}`);
+  }
+
+  // =========================================================================
+  // HÀM ĐÃ ĐỔI ĐƯỜNG DẪN: Hướng thẳng sang StudentAttemptController riêng biệt
+  // =========================================================================
+  checkExamAttempts(examId: number, userId: number): Observable<any> {
+    return this.http.get<any>(`${this.rootUrl}/student-attempts/${examId}/check-attempts?userId=${userId}`);
   }
 }

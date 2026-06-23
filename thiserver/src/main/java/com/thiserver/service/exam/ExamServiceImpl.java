@@ -42,8 +42,6 @@ public class ExamServiceImpl implements ExamService {
         }
         return examRepo.save(examDto);
     }
-
-    // BỔ SUNG HÀM LOGIC ĐẢO ĐỀ CHUẨN Ở TẦNG SERVICE
     @Override
     public List<Questions> getShuffledQuestionsForStudent(Long examId) {
         Exam exam = examRepo.findById(examId).orElse(null);
@@ -53,8 +51,6 @@ public class ExamServiceImpl implements ExamService {
 
         List<Questions> originalQuestions = exam.getQuestions();
         List<Questions> shuffledQuestions = new ArrayList<>();
-
-        // Thực hiện sao chép sâu (Deep Copy) để tránh làm xáo trộn dữ liệu gốc trong DB
         for (Questions q : originalQuestions) {
             Questions newQ = new Questions();
             newQ.setId(q.getId());
@@ -120,6 +116,7 @@ public class ExamServiceImpl implements ExamService {
         return stats;
     }
 
+    @Override
     public Exam toggleExamStatus(Long id) {
         Optional<Exam> optionalExam = examRepo.findById(id);
         if (optionalExam.isPresent()) {
@@ -146,5 +143,13 @@ public class ExamServiceImpl implements ExamService {
             return exam; 
         }
         return null;
+    }
+    public Exam toggleShuffle(Long examId) {
+        Exam exam = examRepo.findById(examId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đề thi với ID: " + examId));
+        
+        exam.setShuffled(!exam.isShuffled());
+
+        return examRepo.save(exam);
     }
 }

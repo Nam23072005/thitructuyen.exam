@@ -12,8 +12,7 @@ import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { SharedModule } from '../../../modules/shared/shared-module';
 import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { NzTooltipModule } from 'ng-zorro-antd/tooltip'; // THÊM DÒNG NÀY
+import { NzTooltipModule } from 'ng-zorro-antd/tooltip';
 
 @Component({
   selector: 'app-class-details',
@@ -29,8 +28,7 @@ import { NzTooltipModule } from 'ng-zorro-antd/tooltip'; // THÊM DÒNG NÀY
     NzTagModule, 
     NzEmptyModule,
     NzPopconfirmModule,
-    HttpClientModule,
-    NzTooltipModule // THÊM DÒNG NÀY vào mảng imports
+    NzTooltipModule
   ],
   templateUrl: './class-details.html',
   styleUrl: './class-details.scss',
@@ -52,8 +50,7 @@ export class ClassDetails implements OnInit {
     private route: ActivatedRoute,
     private classroomService: ClassroomService,
     private message: NzMessageService,
-    private cdr: ChangeDetectorRef,
-    private http: HttpClient
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -93,7 +90,7 @@ export class ClassDetails implements OnInit {
   }
 
   onToggleShuffle(exam: any): void {
-    this.http.put(`http://localhost:8080/api/user-exams/${exam.id}/toggle-shuffle`, {}).subscribe({
+    this.classroomService.toggleExamShuffle(exam.id).subscribe({
       next: (updatedExam: any) => {
         exam.shuffled = updatedExam.shuffled;
         

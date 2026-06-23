@@ -6,15 +6,13 @@ import com.thiserver.entities.Questions;
 import com.thiserver.entities.Result;
 import com.thiserver.repository.ExamRepository;
 import com.thiserver.repository.ResultRepository;
-import com.thiserver.repository.UserRepository;
-import com.thiserver.service.exam.ExamService; 
+import com.thiserver.repository.UserRepository; // 1. BỔ SUNG IMPORT NÀY
 import com.thiserver.service.exam.ResultService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/user-exams")
@@ -25,65 +23,26 @@ public class ExamResultController {
     private ResultService resultService;
 
     @Autowired
-    private ExamService examService; // Tiêm ExamService để dùng hàm đảo đề chuẩn kiến trúc
-
-    @Autowired
     private ExamRepository examRepository;
 
     @Autowired
     private ResultRepository resultRepository;
 
+    // 2. BỔ SUNG REPOSITORY CỦA USER
     @Autowired
     private UserRepository userRepository;
 
     @GetMapping("/{id}")
     public ResponseEntity<Exam> getExamDetail(@PathVariable Long id) {
         return examRepository.findById(id)
-                .map(exam -> {
-                    // Cắt bớt mảng câu hỏi khi lấy chi tiết cấu hình để giảm tải dữ liệu thừa
-                    if (exam.getQuestions() != null) {
-                        exam.setQuestions(null);
-                    }
-                    return ResponseEntity.ok(exam);
-                })
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // BỔ SUNG: API phục vụ Angular check số lượt làm bài trước khi cho ấn nút "Vào thi"
-    @GetMapping("/{examId}/check-attempts")
-    public ResponseEntity<?> checkAttempts(@PathVariable Long examId, @RequestParam Long userId) {
-        return examRepository.findById(examId).map(exam -> {
-            long takenAttempts = resultRepository.countByUser_IdAndExam_Id(userId, examId);
-            boolean isAllowed = takenAttempts < exam.getMaxAttempts();
-            
-            return ResponseEntity.ok(Map.of(
-                "allowed", isAllowed,
-                "takenAttempts", takenAttempts,
-                "maxAttempts", exam.getMaxAttempts()
-            ));
-        }).orElse(ResponseEntity.notFound().build());
-    }
-
     @GetMapping("/{examId}/questions")
-    public ResponseEntity<?> getExamQuestions(@PathVariable Long examId, @RequestParam Long userId) {
+    public ResponseEntity<List<Questions>> getExamQuestions(@PathVariable Long examId) {
         return examRepository.findById(examId)
-                .map(exam -> {
-                    // 1. Kiểm tra số lần làm bài của học sinh này trong DB
-                    long takenAttempts = resultRepository.countByUser_IdAndExam_Id(userId, examId);
-                    if (takenAttempts >= exam.getMaxAttempts()) {
-                        return ResponseEntity.badRequest().body(Map.of("message", "Bạn đã hết lượt làm bài thi này!"));
-                    }
-
-                    // 2. Gọi tầng Service xử lý đảo đề thi 
-                    List<Questions> shuffledQuestions = examService.getShuffledQuestionsForStudent(examId);
-                    
-                    // 3. Nếu đề rỗng (chưa có câu hỏi hoặc bị lỗi mất câu hỏi), báo lỗi trực tiếp
-                    if (shuffledQuestions.isEmpty()) {
-                        return ResponseEntity.badRequest().body(Map.of("message", "Đề thi này hiện tại chưa có câu hỏi nào. Vui lòng liên hệ giáo viên!"));
-                    }
-
-                    return ResponseEntity.ok(shuffledQuestions);
-                })
+                .map(exam -> ResponseEntity.ok(exam.getQuestions()))
                 .orElse(ResponseEntity.notFound().build());
     }
 
@@ -95,29 +54,26 @@ public class ExamResultController {
 
     @GetMapping("/class/{classId}")
     public ResponseEntity<?> getResultsByClass(@PathVariable Long classId) {
+        // Tìm toàn bộ điểm thi của các học sinh thuộc ID lớp học này
         return ResponseEntity.ok(resultRepository.findByUser_Classroom_Id(classId));
     }
 
     @GetMapping("/all")
     public ResponseEntity<?> getAllExamsForTeacher() {
-        List<Exam> exams = examRepository.findAll();
-        if (exams != null) {
-            exams.forEach(exam -> exam.setQuestions(null));
-        }
-        return ResponseEntity.ok(exams);
+        return ResponseEntity.ok(examRepository.findAll());
     }
 
+    // 3. BỔ SUNG API NÀY CHO TRANG DASHBOARD CỦA HỌC SINH
     @GetMapping("/student/{studentId}/available-exams")
     public ResponseEntity<?> getAvailableExamsForStudent(@PathVariable Long studentId) {
         return userRepository.findById(studentId)
                 .map(user -> {
+                    // Kiểm tra xem học sinh này đã thuộc lớp nào chưa
                     if (user.getClassroom() != null) {
-                        List<Exam> allowedExams = user.getClassroom().getAllowedExams();
-                        if (allowedExams != null) {
-                            allowedExams.forEach(exam -> exam.setQuestions(null));
-                        }
-                        return ResponseEntity.ok(allowedExams);
+                        // Trả về danh sách đề thi đã được giáo viên giao cho lớp đó
+                        return ResponseEntity.ok(user.getClassroom().getAllowedExams());
                     }
+                    // Nếu chưa có lớp, trả về mảng rỗng
                     return ResponseEntity.ok(new java.util.ArrayList<>());
                 })
                 .orElse(ResponseEntity.notFound().build());
