@@ -69,4 +69,22 @@ public class TeacherController {
         }
         return ResponseEntity.notFound().build();
     }
+
+    // Bật/Tắt công tắc cấu hình đảo đề (Giao diện Giáo viên)
+    @PutMapping("/exams/{id}/toggle-shuffle")
+    public ResponseEntity<?> toggleShuffle(@PathVariable Long id) {
+        try {
+          
+            Exam updatedExam = examService.toggleShuffle(id);
+            
+            return ResponseEntity.ok(Map.of(
+                "id", updatedExam.getId(),
+                "shuffled", updatedExam.isShuffled()
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Lỗi hệ thống: " + e.getMessage());
+        }
+    }
 }

@@ -2,9 +2,18 @@ package com.thiserver.repository;
 
 import com.thiserver.entities.Result;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public interface ResultRepository extends JpaRepository<Result,Long> {
+@Repository
+public interface ResultRepository extends JpaRepository<Result, Long> {
     List<Result> findByExamId(Long examId);
+    List<Result> findByUser_Classroom_Id(Long classId);
+
+    // Đếm số lần học sinh nộp bài dựa theo userId và examId
+    long countByUser_IdAndExam_Id(Long userId, Long examId);
+
+    // ĐÃ FIX: Sửa thành findByUser_Id để map đúng với thuộc tính quan hệ trong Entity Result
+    List<Result> findByUser_Id(Long userId);
 }

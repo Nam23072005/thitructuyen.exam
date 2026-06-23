@@ -24,4 +24,13 @@ public class Result {
     @ManyToOne
     @JoinColumn(name = "exam_id")
     private Exam exam; // Làm đề thi nào?
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    // Hàm này sẽ tự động chạy để lấy giờ hiện tại của máy tính ngay trước khi lưu vào Database
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

@@ -34,6 +34,14 @@
           </nz-form-control>
         </nz-form-item>
 
+        <ng-container *ngIf="validateForm.get('role')?.value === 'USER'">
+        <nz-form-item>
+          <nz-form-control nzErrorTip="Vui lòng nhập tên lớp học!">
+            <input nz-input formControlName="classroomName" placeholder="Nhập tên lớp học (Ví dụ: 68MHT2)" />
+          </nz-form-control>
+        </nz-form-item>
+        </ng-container>
+
         <button nz-button class="login-form-button login-form-margin" [nzType]="'primary'">Đăng ký</button>
         Hoặc <a routerLink="/login">Đăng nhập</a>
       </form>
