@@ -1,7 +1,6 @@
-import { ChangeDetectorRef, Component } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { SharedModule } from '../../../modules/shared/shared-module';
-import { ClassroomService } from '../../../services/classroom';
-import { NzMessageService } from 'ng-zorro-antd/message';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-student-dashboard',
@@ -9,40 +8,62 @@ import { NzMessageService } from 'ng-zorro-antd/message';
   templateUrl: './student-dashboard.html',
   styleUrl: './student-dashboard.scss',
 })
-export class StudentDashboard {
+export class StudentDashboard implements OnInit {
   exams: any[] = [];
-  loading = false;
+  history: any[] = [];
+  isLoading = true;
+  isLoadingHistory = true;
 
-  constructor(
-    private classroomService: ClassroomService, // Inject Service của bạn vào đây
-    private message: NzMessageService,
-    private cdr: ChangeDetectorRef
-  ) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
-    // Lấy ID học sinh đang đăng nhập từ localStorage
-    const studentIdStr = localStorage.getItem('user_id'); 
-    if (studentIdStr) {
-      this.loadStudentExams(+studentIdStr);
-      this.cdr.detectChanges();
-    } else {
-      this.message.error('Không tìm thấy thông tin tài khoản học sinh!');
-    }
+    this.loadExams();
+    this.loadHistory();
   }
 
-  loadStudentExams(studentId: number): void {
-    this.loading = true;
-    this.classroomService.getStudentExams(studentId).subscribe({
+  loadExams(): void {
+    const userId = localStorage.getItem('user_id'); // Lấy mã học sinh đang đăng nhập
+    
+    if (!userId) {
+      this.isLoading = false;
+      this.cdr.detectChanges();
+      return;
+    }
+
+    // ĐÃ FIX: Chuyển sang gọi endpoint lấy đề thi được giao riêng cho lớp của học sinh này
+    this.http.get<any[]>(`http://localhost:8080/api/user-exams/student/${userId}/available-exams`).subscribe({
       next: (res) => {
-        this.exams = res || [];
-        this.loading = false;
-        this.cdr.detectChanges(); // Ép Angular cập nhật giao diện ngay lập tức
+        this.exams = res;
+        this.isLoading = false;
+        this.cdr.detectChanges();
       },
       error: (err) => {
-        this.message.error('Lỗi khi tải danh sách đề thi!');
-        this.loading = false;
-        this.cdr.detectChanges(); // Ép Angular cập nhật giao diện ngay lập tức
-      }
+        console.error('Lỗi tải danh sách đề thi theo lớp:', err);
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      },
+    });
+  }
+
+  loadHistory(): void {
+    const userId = localStorage.getItem('user_id');
+    if (!userId) {
+      this.isLoadingHistory = false;
+      this.cdr.detectChanges();
+      return;
+    }
+
+    this.http.get<any[]>(`http://localhost:8080/api/user-exams/history/${userId}`).subscribe({
+      next: (res) => {
+        this.history = res;
+        this.isLoadingHistory = false;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Lỗi tải lịch sử thi:', err);
+        this.isLoadingHistory = false;
+        this.cdr.detectChanges();
+      },
     });
   }
 }

@@ -13,4 +13,7 @@ public interface ResultRepository extends JpaRepository<Result, Long> {
 
     // Đếm số lần học sinh nộp bài dựa theo userId và examId
     long countByUser_IdAndExam_Id(Long userId, Long examId);
+
+    // ĐÃ FIX: Sửa thành findByUser_Id để map đúng với thuộc tính quan hệ trong Entity Result
+    List<Result> findByUser_Id(Long userId);
 }

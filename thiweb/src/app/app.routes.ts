@@ -7,19 +7,23 @@ import { ManageExams } from './pages/teacher/manage-exams/manage-exams';
 import { AddQuestion } from './pages/teacher/add-question/add-question';
 import { ExamStats } from './pages/teacher/exam-stats/exam-stats';
 import { StudentExamComponent } from './pages/student/student-exam/student-exam.component';
+import { StudentHistory } from './pages/student/student-history/student-history.component';
 import { ManageClassesComponent } from './pages/teacher/manage-classes/manage-classes';
 import { ClassDetails } from './pages/teacher/class-details/class-details';
 
 export const routes: Routes = [
-  { path: 'register', component: Signup },
+  // --- HỆ THỐNG AUTH ---
   { path: 'login', component: Login },
-  { path: 'teacher/dashboard', component: TeacherDashboard },
-  { path: 'student/dashboard', component: StudentDashboard },
+  { path: 'register', component: Signup },
   { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: 'teacher/dashboard', component: TeacherDashboard },
   { path: 'teacher/manage-exams', component: ManageExams },
   { path: 'teacher/add-question/:id', component: AddQuestion },
   { path: 'teacher/stats/:id', component: ExamStats },
+  { path: 'teacher/classes', component: ManageClassesComponent },       
+  { path: 'teacher/class-details/:id', component: ClassDetails },    
+  { path: 'student/dashboard', component: StudentDashboard },
   { path: 'student/exam/:id', component: StudentExamComponent },
-  { path: 'teacher/classes', component: ManageClassesComponent },
-  { path: 'teacher/class-details/:id', component: ClassDetails },
+  { path: 'student/history', component: StudentHistory },               
+  { path: '**', redirectTo: '/login' }
 ];

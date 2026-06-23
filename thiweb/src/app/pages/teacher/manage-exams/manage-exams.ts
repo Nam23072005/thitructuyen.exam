@@ -63,11 +63,11 @@ export class ManageExams implements OnInit {
     this.isEditMode = false;
     this.editingExamId = null;
     
-    // 1. Mở modal rỗng trước
+    // Mở trạng thái trước
     this.isVisible = true;
     this.cdr.detectChanges();
 
-    // 2. Nạp dữ liệu mặc định sau để tránh lỗi kiểm tra chu kỳ (NG0100)
+    // Đồng bộ luồng macro-task tránh lỗi NG0100
     setTimeout(() => {
       this.newExam = {
         title: '',
@@ -84,11 +84,9 @@ export class ManageExams implements OnInit {
     this.isEditMode = true;
     this.editingExamId = exam.id;
     
-    // 1. Mở khung modal trước
     this.isVisible = true;
     this.cdr.detectChanges();
 
-    // 2. Đổ dữ liệu của đề cần sửa vào form ở chu kỳ tiếp theo
     setTimeout(() => {
       this.newExam = {
         title: exam.title,
@@ -98,42 +96,57 @@ export class ManageExams implements OnInit {
         teacherId: localStorage.getItem('user_id'),
       };
       this.cdr.detectChanges();
-    }, 10); // delay 10ms để dứt khoát chu kỳ render modal của Ng-Zorro
+    }, 0);
   }
 
   handleCancel(): void {
     this.isVisible = false;
+    this.cdr.detectChanges(); // Thêm detectChanges khi hủy đóng khung
   }
 
   handleOk(): void {
     this.isConfirmLoading = true;
+    this.cdr.detectChanges();
 
     if (this.isEditMode && this.editingExamId) {
       const updatedData = { id: this.editingExamId, ...this.newExam };
       
       this.examService.saveExam(updatedData).subscribe({
         next: () => {
-          this.isVisible = false;
-          this.isConfirmLoading = false;
-          this.message.success('Cập nhật đề thi thành công!');
-          this.loadExams();
+          // Bọc thay đổi trạng thái đóng modal để tránh xung đột chu kỳ vẽ UI
+          setTimeout(() => {
+            this.isVisible = false;
+            this.isConfirmLoading = false;
+            this.message.success('Cập nhật đề thi thành công!');
+            this.loadExams();
+            this.cdr.detectChanges();
+          }, 0);
         },
         error: (err) => {
-          this.isConfirmLoading = false;
-          this.message.error('Lỗi khi cập nhật đề thi');
+          setTimeout(() => {
+            this.isConfirmLoading = false;
+            this.message.error('Lỗi khi cập nhật đề thi');
+            this.cdr.detectChanges();
+          }, 0);
         }
       });
     } else {
       this.examService.saveExam(this.newExam).subscribe({
         next: (res) => {
-          this.isVisible = false;
-          this.isConfirmLoading = false;
-          this.message.success('Tạo đề thành công!');
-          this.router.navigate(['/teacher/add-question', res.id]);
+          setTimeout(() => {
+            this.isVisible = false;
+            this.isConfirmLoading = false;
+            this.message.success('Tạo đề thành công!');
+            this.router.navigate(['/teacher/add-question', res.id]);
+            this.cdr.detectChanges();
+          }, 0);
         },
         error: (err) => {
-          this.isConfirmLoading = false;
-          this.message.error('Lỗi khi tạo đề');
+          setTimeout(() => {
+            this.isConfirmLoading = false;
+            this.message.error('Lỗi khi tạo đề');
+            this.cdr.detectChanges();
+          }, 0);
         },
       });
     }
@@ -147,6 +160,7 @@ export class ManageExams implements OnInit {
       },
       error: (err) => {
         this.message.error('Lỗi khi khóa/mở khóa đề thi');
+        this.cdr.detectChanges();
       },
     });
   }

@@ -4,7 +4,6 @@ import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SharedModule } from '../../../modules/shared/shared-module';
-import { ClassroomService } from '../../../services/classroom'; // 3 cấp thư mục chuẩn đét
 
 @Component({
   selector: 'app-student-exam',
@@ -18,20 +17,19 @@ export class StudentExamComponent implements OnInit, OnDestroy {
   selectedAnswers: { [key: number]: number } = {}; 
   examId: number | null = null;
   userId: number | null = null;
-  isExamShuffled: boolean = false; // Biến cờ lưu trạng thái cấu hình đảo đề của giáo viên
   
-  // Logic đếm ngược thời gian
   remainingTime: string = "00:00"; 
   seconds: number = 0;
   timer: any;
-  showWarning: boolean = false; // Điều khiển popup thông báo còn 10 phút
+  showWarning: boolean = false; 
+  showResultModal: boolean = false;
+  submissionResult: any = null;
 
   constructor(
     private route: ActivatedRoute, 
     private http: HttpClient,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private classroomService: ClassroomService // Inject ClassroomService tập trung
   ) {}
 
   ngOnInit() {
@@ -44,21 +42,10 @@ export class StudentExamComponent implements OnInit, OnDestroy {
 
     if (idParam) {
       this.examId = Number(idParam);
-      // BƯỚC ĐẦU TIÊN: Kiểm tra số lượt làm bài trước khi nạp dữ liệu thi công khai
       this.checkExamAttemptsBeforeStart();
     }
   }
 
-  // Thuật toán xáo trộn mảng ngẫu nhiên (Fisher-Yates Shuffle) để xử lý đảo đề tại Client
-  shuffleArray(array: any[]): any[] {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-  }
-
-  // Check lượt làm bài bằng API check-attempts thông qua Service tập trung
   checkExamAttemptsBeforeStart() {
     if (!this.userId || !this.examId) {
       alert('Thông tin tài khoản hoặc mã đề không hợp lệ!');
@@ -66,19 +53,18 @@ export class StudentExamComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.classroomService.checkExamAttempts(this.examId, this.userId)
+    this.http.get<any>(`http://localhost:8080/api/user-exams/${this.examId}/check-attempts?userId=${this.userId}`)
       .subscribe({
         next: (res) => {
           if (res && res.allowed === false) {
             alert(`Bạn đã hết lượt làm bài thi này! (Số lần đã làm: ${res.takenAttempts}/${res.maxAttempts})`);
             this.router.navigate(['/student/dashboard']);
           } else {
-            // Nếu còn lượt, cho phép tải dữ liệu cấu hình thời gian và câu hỏi bình thường
             this.loadExamData();
           }
         },
         error: (err) => {
-          console.error('Lỗi khi kiểm tra số lượt làm bài:', err);
+          console.error(err);
           alert('Không thể xác thực số lượt làm bài thi từ hệ thống!');
           this.router.navigate(['/student/dashboard']);
         }
@@ -86,52 +72,49 @@ export class StudentExamComponent implements OnInit, OnDestroy {
   }
 
   loadExamData() {
-    // 1. Gọi API lấy thông tin cấu hình chung qua Service tập trung
-    this.classroomService.getExamDetail(this.examId!)
+    this.http.get<any>(`http://localhost:8080/api/user-exams/${this.examId}`)
       .subscribe({
         next: (exam) => {
-          this.seconds = exam.duration * 60; // Chuyển đổi từ phút sang giây
-          this.isExamShuffled = exam.shuffled || false; // Đồng bộ cấu hình công tắc đảo đề
+          this.seconds = exam.duration * 60; 
           this.formatTime();
           this.startCountdown();
-          
-          // 2. Gọi lồng tiếp API lấy danh sách câu hỏi qua Service tập trung
           this.loadQuestionsData();
         },
         error: (err) => {
-          console.error('Lỗi khi tải dữ liệu cấu hình đề thi:', err);
+          console.error(err);
           alert('Không thể tải thông tin đề thi. Vui lòng kiểm tra lại Backend!');
         }
       });
   }
 
+  // 1. ĐÃ BỔ SUNG: Thuật toán Fisher-Yates xáo trộn vị trí ngẫu nhiên một mảng độc lập
+  shuffle(array: any[]): any[] {
+    let currentIndex = array.length, randomIndex;
+    while (currentIndex !== 0) {
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+      // Hoán đổi vị trí hai phần tử cho nhau
+      [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    }
+    return array;
+  }
+
   loadQuestionsData() {
-    this.classroomService.getExamQuestions(this.examId!, this.userId!)
+    this.http.get<any[]>(`http://localhost:8080/api/user-exams/${this.examId}/questions?userId=${this.userId}`)
       .subscribe({
         next: (questionsData) => {
-          let loadedQuestions = questionsData || [];
-
-          // XỬ LÝ LOGIC ĐẢO ĐỀ TẠI FRONTEND: Nếu giáo viên bật nút công tắc
-          if (this.isExamShuffled && loadedQuestions.length > 0) {
-            console.log('Cấu hình đảo đề đang BẬT -> Đang trộn thứ tự câu hỏi và đáp án bằng Angular...');
-            
-            // Trộn thứ tự ngẫu nhiên của các câu hỏi
-            loadedQuestions = this.shuffleArray(loadedQuestions);
-
-            // Trộn tiếp thứ tự ngẫu nhiên của các phương án lựa chọn (Options) trong từng câu hỏi
-            loadedQuestions.forEach(q => {
-              if (q.options && q.options.length > 0) {
-                q.options = this.shuffleArray(q.options);
-              }
-            });
-          }
-
-          this.questions = loadedQuestions;
+          // 2. ĐÃ SỬA: Ép danh sách câu hỏi chạy qua hàm shuffle để thực hiện đảo đề liên tục
+          const rawQuestions = questionsData || [];
+          this.questions = this.shuffle([...rawQuestions]); 
           this.cdr.detectChanges(); 
         },
         error: (err) => {
-          console.error('Lỗi khi tải danh sách câu hỏi của đề:', err);
-          alert('Có lỗi xảy ra khi tải câu hỏi bài thi!');
+          console.error(err);
+          if (err.error && err.error.message) {
+            alert(err.error.message);
+          } else {
+            alert('Có lỗi xảy ra khi tải câu hỏi bài thi!');
+          }
           this.router.navigate(['/student/dashboard']);
         }
       });
@@ -202,18 +185,23 @@ export class StudentExamComponent implements OnInit, OnDestroy {
       }))
     };
 
-    // Gọi qua hàm submitExam tập trung của ClassroomService công khai
-    this.classroomService.submitExam(submission)
+    this.http.post('http://localhost:8080/api/user-exams/submit', submission)
       .subscribe({
         next: (res: any) => {
           this.stopTimer(); 
-          alert(`Nộp bài thành công! Điểm của bạn: ${res.score}`);
-          this.router.navigate(['/student/dashboard']);
+          this.submissionResult = res;
+          this.showResultModal = true;
+          this.cdr.detectChanges();
         },
         error: (err) => {
-          console.error('Lỗi nộp bài:', err);
+          console.error(err);
           alert('Có lỗi xảy ra khi nộp bài.');
         }
       });
+  }
+
+  backToDashboard() {
+    this.showResultModal = false;
+    this.router.navigate(['/student/dashboard']);
   }
 }
